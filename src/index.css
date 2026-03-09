@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
+
+.glass-card {
+  @apply bg-card/80 backdrop-blur-md border border-white/5 shadow-glass rounded-2xl;
+}
+
