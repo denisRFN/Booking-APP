@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages\DashboardPage";
+import DashboardPage from "./pages/DashboardPage";
 import MyReservationsPage from "./pages/MyReservationsPage";
 import AdminPanelPage from "./pages/AdminPanelPage";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
@@ -77,4 +77,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 
