@@ -41,3 +41,42 @@ body {
   background-color: hsl(32 95% 55% / 0.08);
 }
 
+.calendar-theme .rbc-time-view,
+.calendar-theme .rbc-time-header,
+.calendar-theme .rbc-time-content {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.calendar-theme .rbc-time-slot,
+.calendar-theme .rbc-timeslot-group {
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+.calendar-theme .rbc-time-header-gutter,
+.calendar-theme .rbc-time-gutter {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.calendar-theme .rbc-header {
+  border-color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.calendar-theme .rbc-toolbar {
+  padding: 0.5rem 0.75rem;
+}
+
+.calendar-theme .rbc-toolbar button {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding-inline: 0.9rem;
+  padding-block: 0.3rem;
+  font-size: 0.75rem;
+  text-transform: none;
+}
+
+.calendar-theme .rbc-toolbar button:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+

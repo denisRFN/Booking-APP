@@ -47,7 +47,7 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
         defaultDate={defaultDate}
         onNavigate={onNavigate}
         onView={onViewChange}
-        style={{ height: 420 }}
+        style={{ height: 520 }}
         toolbar
         popup
       />
