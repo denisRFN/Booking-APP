@@ -53,7 +53,7 @@ export default function DashboardPage() {
 
   return (
     <MainLayout>
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1.1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] items-start">
         <div className="space-y-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -78,7 +78,7 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="h-[520px]">
               {availabilityQuery.isLoading && <p className="text-sm text-muted-foreground">Loading desks...</p>}
               {availabilityQuery.data && (
                 <DeskMap desks={availabilityQuery.data} onSelectDesk={handleDeskClick} />
@@ -115,4 +115,5 @@ export default function DashboardPage() {
     </MainLayout>
   );
 }
+
 
