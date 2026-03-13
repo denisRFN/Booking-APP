@@ -38,7 +38,7 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
   );
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/70 shadow-subtle backdrop-blur-xl">
+    <div className="calendar-theme overflow-hidden rounded-2xl border border-white/[0.06] bg-secondary/80 shadow-subtle backdrop-blur-xl">
       <Calendar
         localizer={localizer}
         events={rbcEvents}

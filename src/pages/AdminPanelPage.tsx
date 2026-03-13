@@ -91,9 +91,9 @@ export default function AdminPanelPage() {
   return (
     <MainLayout>
       <div className="grid gap-4 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.1fr)]">
-        <Card>
+        <Card className="opacity-0 animate-stagger-1">
           <CardHeader>
-            <CardTitle>Desk layout (admin)</CardTitle>
+            <CardTitle className="font-display font-bold">Desk layout (admin)</CardTitle>
             <CardDescription>Drag desks to reposition them on the map.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -121,7 +121,7 @@ export default function AdminPanelPage() {
                 </Button>
               </div>
             </div>
-            <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-glass backdrop-blur-xl">
+            <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-white/[0.06] bg-secondary/90 shadow-glass backdrop-blur-xl">
               {desksQuery.data?.map((desk) => {
                 return (
                   <Rnd
@@ -142,7 +142,7 @@ export default function AdminPanelPage() {
                       updateDeskPositionMutation.mutate({ ...desk, position_x: newX, position_y: newY });
                     }}
                     enableResizing={false}
-                    className="flex items-center justify-center rounded-xl bg-sky-500/90 text-xs font-semibold text-slate-950 shadow-lg shadow-black/40"
+                    className="flex items-center justify-center rounded-xl bg-primary/90 text-xs font-semibold text-primary-foreground shadow-lg shadow-black/40"
                   >
                     {desk.name}
                   </Rnd>
@@ -152,9 +152,9 @@ export default function AdminPanelPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="opacity-0 animate-stagger-2">
           <CardHeader>
-            <CardTitle>All reservations</CardTitle>
+            <CardTitle className="font-display font-bold">All reservations</CardTitle>
             <CardDescription>View and manage all users&apos; bookings.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -162,7 +162,7 @@ export default function AdminPanelPage() {
               {reservationsQuery.data?.map((r) => (
                 <div
                   key={r.id}
-                  className="flex items-center justify-between rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 shadow-subtle"
+                  className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-secondary/80 px-4 py-3 shadow-subtle"
                 >
                   <div>
                     <div className="font-medium">

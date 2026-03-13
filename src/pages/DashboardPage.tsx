@@ -55,10 +55,10 @@ export default function DashboardPage() {
     <MainLayout>
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] items-start">
         <div className="space-y-4">
-          <Card>
+          <Card className="opacity-0 animate-stagger-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Office map</CardTitle>
+                <CardTitle className="font-display font-bold">Office map</CardTitle>
                 <CardDescription>Select a desk to reserve.</CardDescription>
               </div>
               <div className="flex gap-2 text-xs">
@@ -87,9 +87,9 @@ export default function DashboardPage() {
           </Card>
         </div>
         <div className="space-y-4">
-          <Card>
+          <Card className="opacity-0 animate-stagger-2">
             <CardHeader>
-              <CardTitle>Calendar</CardTitle>
+              <CardTitle className="font-display font-bold">Calendar</CardTitle>
               <CardDescription>Your upcoming reservations.</CardDescription>
             </CardHeader>
             <CardContent>

@@ -12,7 +12,7 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-sm text-muted-foreground">
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground font-sans">
         Loading...
       </div>
     );
@@ -30,7 +30,7 @@ function AdminRoute({ children }: { children: JSX.Element }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-sm text-muted-foreground">
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground font-sans">
         Loading...
       </div>
     );
@@ -45,6 +45,7 @@ function AdminRoute({ children }: { children: JSX.Element }) {
 export default function App() {
   return (
     <AuthProvider>
+      <div className="grain-overlay" aria-hidden="true" />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

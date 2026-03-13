@@ -24,8 +24,10 @@ export function MainLayout({ children }: MainLayoutProps) {
       <Link
         to={to}
         className={cn(
-          "px-3 py-1 rounded-full text-sm transition-colors",
-          active ? "bg-white/10 text-foreground" : "text-muted-foreground hover:bg-white/5"
+          "px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200",
+          active
+            ? "bg-primary/15 text-primary border border-primary/20"
+            : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
         )}
       >
         {label}
@@ -34,29 +36,29 @@ export function MainLayout({ children }: MainLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-background via-[hsl(30,14%,9%)] to-background">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-6">
-        <header className="mb-6 flex items-center justify-between rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 shadow-subtle backdrop-blur-xl">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-500 shadow-glass" />
-            <div>
-              <div className="text-sm font-semibold tracking-tight">DeskFlow</div>
+        <header className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-white/[0.06] bg-card/90 px-5 py-3.5 shadow-subtle backdrop-blur-xl">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-primary to-amber-600 shadow-glow" />
+            <div className="min-w-0">
+              <div className="font-display text-lg font-bold tracking-tight text-foreground">DeskFlow</div>
               <div className="text-xs text-muted-foreground">Office desk booking</div>
             </div>
           </div>
           {user && (
-            <nav className="flex items-center gap-2 text-sm">
+            <nav className="flex items-center gap-1.5 text-sm">
               <NavLink to="/dashboard" label="Dashboard" />
               <NavLink to="/reservations" label="My reservations" />
               {user.role === "admin" && <NavLink to="/admin" label="Admin" />}
             </nav>
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             {user && (
               <>
                 <div className="hidden text-right text-xs sm:block">
                   <div className="font-medium text-foreground">{user.name}</div>
-                  <div className="text-muted-foreground">{user.email}</div>
+                  <div className="truncate max-w-[160px] text-muted-foreground">{user.email}</div>
                 </div>
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
                   Logout

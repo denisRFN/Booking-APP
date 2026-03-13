@@ -24,9 +24,9 @@ export default function MyReservationsPage() {
 
   return (
     <MainLayout>
-      <Card>
+      <Card className="opacity-0 animate-stagger-1">
         <CardHeader>
-          <CardTitle>My reservations</CardTitle>
+          <CardTitle className="font-display font-bold">My reservations</CardTitle>
           <CardDescription>Manage your upcoming and past desk bookings.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -35,7 +35,7 @@ export default function MyReservationsPage() {
             {data?.map((r) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm shadow-subtle"
+                className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-secondary/80 px-4 py-3 text-sm shadow-subtle"
               >
                 <div>
                   <div className="font-medium">

@@ -60,7 +60,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reserve {desk.name}</DialogTitle>
+          <DialogTitle className="font-display font-bold">Reserve {desk.name}</DialogTitle>
           <DialogDescription>
             {defaultDate.toLocaleDateString()} · Room {desk.room}
           </DialogDescription>

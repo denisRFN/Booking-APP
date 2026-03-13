@@ -34,10 +34,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4">
-      <Card className="w-full max-w-md border border-white/10">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-[hsl(30,14%,9%)] to-background px-4">
+      <Card className="w-full max-w-md border border-white/[0.06] animate-slide-up opacity-0 [animation-fill-mode:forwards]">
         <CardHeader>
-          <CardTitle>Create your account</CardTitle>
+          <CardTitle className="font-display font-bold">Create your account</CardTitle>
           <CardDescription>Join and start booking desks.</CardDescription>
         </CardHeader>
         <CardContent>
