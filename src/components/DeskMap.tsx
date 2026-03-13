@@ -14,8 +14,13 @@ export function DeskMap({ desks, onSelectDesk }: DeskMapProps) {
 
   return (
     <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-slate-900/40 shadow-glass backdrop-blur-xl">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.12),transparent_55%),radial-gradient(circle_at_bottom,_rgba(129,140,248,0.16),transparent_60%)]" />
-      <div className="relative h-full w-full">
+      <div className="absolute flex items-center justify-center
+           bg-emerald-500 hover:bg-emerald-400
+           text-black text-sm font-medium
+           px-3 py-2 rounded-xl shadow-lg
+           cursor-pointer transition-all duration-150
+           hover:scale-105" />
+      <div className="relative w-full h-full rounded-xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 overflow-hidden">
         {desks.map((desk) => {
           const left = (desk.position_x / maxX) * 100;
           const top = (desk.position_y / maxY) * 100;
@@ -59,4 +64,5 @@ function LegendDot({ className, label }: { className: string; label: string }) {
     </span>
   );
 }
+
 
