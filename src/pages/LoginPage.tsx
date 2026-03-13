@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
-import { Label } from "../components/ui\label";
+import { Label } from "../components/ui/label";
 import { login } from "../services/auth";
 import { useAuth } from "../hooks/useAuth";
 
@@ -78,4 +78,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
 
