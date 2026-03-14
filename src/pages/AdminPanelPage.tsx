@@ -4,11 +4,12 @@ import { Rnd } from "react-rnd";
 
 import { MainLayout } from "../layouts/MainLayout";
 import { apiClient } from "../services/apiClient";
-import { AvailabilityDesk, Reservation } from "../types/api";
+import { Reservation } from "../types/api";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { cn } from "../lib/utils";
 
 interface Desk {
   id: number;
