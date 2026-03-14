@@ -1,3 +1,11 @@
+export interface Desk {
+  id: number;
+  name: string;
+  position_x: number;
+  position_y: number;
+  room: string;
+}
+
 export interface AvailabilityDesk {
   id: number;
   name: string;

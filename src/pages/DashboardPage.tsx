@@ -1,20 +1,27 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { addDays } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { MainLayout } from "../layouts/MainLayout";
 import { apiClient } from "../services/apiClient";
-import { AvailabilityDesk, Reservation } from "../types/api";
+import { AvailabilityDesk, Desk, Reservation } from "../types/api";
+import { useAuth } from "../hooks/useAuth";
 import { DeskMap } from "../components/DeskMap";
+import { EditableDeskMap } from "../components/EditableDeskMap";
 import { ReservationModal } from "../components/ReservationModal";
 import { CalendarView } from "../components/CalendarView";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const isAdmin = user?.role === "admin";
+
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedDesk, setSelectedDesk] = useState<AvailabilityDesk | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   const availabilityQuery = useQuery({
     queryKey: ["availability", selectedDate.toDateString()],
@@ -37,6 +44,32 @@ export default function DashboardPage() {
     }
   });
 
+  const desksQuery = useQuery({
+    queryKey: ["desks"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<Desk[]>("/desks");
+      return data;
+    },
+    enabled: isAdmin && editMode
+  });
+
+  const updateDeskPositionMutation = useMutation({
+    mutationFn: async (desk: Desk & { position_x: number; position_y: number }) => {
+      await apiClient.put(`/desks/${desk.id}`, {
+        position_x: desk.position_x,
+        position_y: desk.position_y
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["desks"] });
+      queryClient.invalidateQueries({ queryKey: ["availability"] });
+    }
+  });
+
+  const handlePositionChange = (desk: Desk, position_x: number, position_y: number) => {
+    updateDeskPositionMutation.mutate({ ...desk, position_x, position_y });
+  };
+
   const handleDeskClick = (desk: AvailabilityDesk) => {
     setSelectedDesk(desk);
     setModalOpen(true);
@@ -56,34 +89,62 @@ export default function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-[2.2fr_1fr] items-stretch">
         <div className="space-y-4 min-w-0">
           <Card className="opacity-0 animate-stagger-1">
-            <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
               <div>
                 <CardTitle className="font-display font-bold">Office map</CardTitle>
-                <CardDescription>Select a desk to reserve.</CardDescription>
+                <CardDescription>
+                  {editMode ? "Drag desks to reposition. Click Done when finished." : "Select a desk to reserve."}
+                </CardDescription>
               </div>
-              <div className="flex gap-2 text-xs">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedDate(addDays(selectedDate, -1))}
-                >
-                  Previous day
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedDate(addDays(selectedDate, 1))}
-                >
-                  Next day
-                </Button>
+              <div className="flex items-center gap-2 flex-wrap">
+                {isAdmin && (
+                  <Button
+                    variant={editMode ? "default" : "secondary"}
+                    size="sm"
+                    onClick={() => setEditMode((e) => !e)}
+                  >
+                    {editMode ? "Done editing" : "Enable edit"}
+                  </Button>
+                )}
+                {!editMode && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedDate(addDays(selectedDate, -1))}
+                    >
+                      Previous day
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+                    >
+                      Next day
+                    </Button>
+                  </>
+                )}
               </div>
             </CardHeader>
             <CardContent className="flex flex-col">
-              {/* Same aspect ratio as Admin desk layout so the map is 1:1 */}
               <div className="w-full aspect-[16/10] min-h-[320px] overflow-hidden">
-                {availabilityQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
-                {availabilityQuery.data && (
-                  <DeskMap desks={availabilityQuery.data} onSelectDesk={handleDeskClick} />
+                {editMode ? (
+                  <>
+                    {desksQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
+                    {desksQuery.data && (
+                      <EditableDeskMap
+                        desks={desksQuery.data}
+                        onPositionChange={handlePositionChange}
+                      />
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {availabilityQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
+                    {availabilityQuery.data && (
+                      <DeskMap desks={availabilityQuery.data} onSelectDesk={handleDeskClick} />
+                    )}
+                  </>
                 )}
               </div>
             </CardContent>
