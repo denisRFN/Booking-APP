@@ -13,8 +13,8 @@ export function DeskMap({ desks, onSelectDesk }: DeskMapProps) {
   const maxY = useMemo(() => Math.max(1, ...desks.map((d) => d.position_y)), [desks]);
 
   return (
-    <div className="relative h-full min-h-[440px] w-full overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-secondary/90 via-card/80 to-secondary/90 shadow-glass backdrop-blur-xl">
-      <div className="relative w-full h-full rounded-xl border border-border bg-gradient-to-br from-secondary to-background overflow-hidden">
+    <div className="relative h-full min-h-[500px] w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-glass backdrop-blur-xl ring-1 ring-white/[0.03]">
+      <div className="office-map-surface relative w-full h-full rounded-xl border border-border overflow-hidden bg-gradient-to-br from-secondary to-background">
         {desks.map((desk) => {
           const left = 10 + (desk.position_x / maxX) * 80;
           const top = 10 + (desk.position_y / maxY) * 80;

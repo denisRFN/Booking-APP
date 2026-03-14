@@ -53,8 +53,8 @@ export default function DashboardPage() {
 
   return (
     <MainLayout>
-      <div className="grid gap-6 lg:grid-cols-[1.7fr_1.1fr] items-start">
-        <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-[2.2fr_1fr] items-stretch">
+        <div className="space-y-4 min-w-0">
           <Card className="opacity-0 animate-stagger-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -78,7 +78,7 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="h-[560px]">
+            <CardContent className="h-[620px] min-h-[520px]">
               {availabilityQuery.isLoading && <p className="text-sm text-muted-foreground">Loading desks...</p>}
               {availabilityQuery.data && (
                 <DeskMap desks={availabilityQuery.data} onSelectDesk={handleDeskClick} />
@@ -86,13 +86,13 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           <Card className="opacity-0 animate-stagger-2">
             <CardHeader>
               <CardTitle className="font-display font-bold">Calendar</CardTitle>
               <CardDescription>Your upcoming reservations.</CardDescription>
             </CardHeader>
-            <CardContent className="h-[560px]">
+            <CardContent className="h-[620px] min-h-[520px] flex flex-col">
               <CalendarView
                 events={events}
                 defaultDate={selectedDate}

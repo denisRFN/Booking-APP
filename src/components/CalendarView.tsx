@@ -38,7 +38,7 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
   );
 
   return (
-    <div className="calendar-theme overflow-hidden rounded-2xl border border-white/[0.06] bg-secondary/80 shadow-subtle backdrop-blur-xl">
+    <div className="calendar-theme flex-1 min-h-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-secondary/90 via-card/80 to-secondary/90 shadow-subtle backdrop-blur-xl ring-1 ring-primary/10">
       <Calendar
         localizer={localizer}
         events={rbcEvents}
@@ -47,7 +47,7 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
         defaultDate={defaultDate}
         onNavigate={onNavigate}
         onView={onViewChange}
-        style={{ height: 520 }}
+        style={{ height: "100%", minHeight: 480 }}
         toolbar
         popup
       />
