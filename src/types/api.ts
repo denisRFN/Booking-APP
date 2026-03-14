@@ -5,6 +5,10 @@ export interface AvailabilityDesk {
   position_y: number;
   room: string;
   status: "available" | "occupied" | "mine";
+  booked_by_name?: string | null;
+  booked_by_email?: string | null;
+  booked_from?: string | null;
+  booked_to?: string | null;
 }
 
 export interface Reservation {
@@ -16,6 +20,8 @@ export interface Reservation {
   start_time: string;
   end_time: string;
   created_at: string;
+  user_name?: string | null;
+  user_email?: string | null;
 }
 
 export interface ReservationEvent {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Rnd } from "react-rnd";
 
@@ -22,6 +22,14 @@ export default function AdminPanelPage() {
   const queryClient = useQueryClient();
   const [newDeskName, setNewDeskName] = useState("");
   const [newDeskRoom, setNewDeskRoom] = useState("Open space");
+  const [selectedDeskId, setSelectedDeskId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editRoom, setEditRoom] = useState("");
+  const mapRef = useRef<HTMLDivElement | null>(null);
+
+  const DESK_W = 80;
+  const DESK_H = 40;
+  const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
   const desksQuery = useQuery({
     queryKey: ["desks"],
@@ -30,6 +38,17 @@ export default function AdminPanelPage() {
       return data;
     }
   });
+
+  const selectedDesk = useMemo(
+    () => desksQuery.data?.find((d) => d.id === selectedDeskId) ?? null,
+    [desksQuery.data, selectedDeskId]
+  );
+
+  useEffect(() => {
+    if (!selectedDesk) return;
+    setEditName(selectedDesk.name);
+    setEditRoom(selectedDesk.room);
+  }, [selectedDesk?.id]);
 
   const reservationsQuery = useQuery({
     queryKey: ["reservations-admin"],
@@ -64,6 +83,7 @@ export default function AdminPanelPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["desks"] });
+      setSelectedDeskId(null);
     }
   });
 
@@ -72,6 +92,18 @@ export default function AdminPanelPage() {
       await apiClient.put(`/desks/${desk.id}`, {
         position_x: desk.position_x,
         position_y: desk.position_y
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["desks"] });
+    }
+  });
+
+  const updateDeskDetailsMutation = useMutation({
+    mutationFn: async (desk: Desk) => {
+      await apiClient.put(`/desks/${desk.id}`, {
+        name: desk.name,
+        room: desk.room
       });
     },
     onSuccess: () => {
@@ -121,33 +153,94 @@ export default function AdminPanelPage() {
                 </Button>
               </div>
             </div>
-            <div className="relative h-[420px] w-full overflow-hidden rounded-2xl border border-white/[0.06] bg-secondary/90 shadow-glass backdrop-blur-xl">
+            <div
+              ref={mapRef}
+              className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-secondary/90 shadow-glass backdrop-blur-xl"
+            >
               {desksQuery.data?.map((desk) => {
+                const rect = mapRef.current?.getBoundingClientRect();
+                const w = rect?.width ?? 1;
+                const h = rect?.height ?? 1;
+
+                // position_x/position_y are stored as center coordinates (0-100)
+                const x = clamp((desk.position_x / 100) * w - DESK_W / 2, 0, w - DESK_W);
+                const y = clamp((desk.position_y / 100) * h - DESK_H / 2, 0, h - DESK_H);
+
+                const active = desk.id === selectedDeskId;
+
                 return (
                   <Rnd
                     key={desk.id}
-                    size={{ width: 80, height: 40 }}
+                    size={{ width: DESK_W, height: DESK_H }}
                     bounds="parent"
-                    default={{
-                      x: (desk.position_x / 100) * 600,
-                      y: (desk.position_y / 100) * 360,
-                      width: 80,
-                      height: 40
-                    }}
+                    position={{ x, y }}
+                    onDragStart={() => setSelectedDeskId(desk.id)}
                     onDragStop={(_, d) => {
-                      const parentWidth = 600;
-                      const parentHeight = 360;
-                      const newX = Math.round((d.x / parentWidth) * 100);
-                      const newY = Math.round((d.y / parentHeight) * 100);
+                      const rect2 = mapRef.current?.getBoundingClientRect();
+                      const w2 = rect2?.width ?? 1;
+                      const h2 = rect2?.height ?? 1;
+                      const centerX = (d.x + DESK_W / 2) / w2;
+                      const centerY = (d.y + DESK_H / 2) / h2;
+                      const newX = Math.round(clamp(centerX * 100, 0, 100));
+                      const newY = Math.round(clamp(centerY * 100, 0, 100));
                       updateDeskPositionMutation.mutate({ ...desk, position_x: newX, position_y: newY });
                     }}
                     enableResizing={false}
-                    className="flex items-center justify-center rounded-xl bg-primary/90 text-xs font-semibold text-primary-foreground shadow-lg shadow-black/40"
+                    className={cn(
+                      "flex items-center justify-center rounded-xl text-xs font-semibold shadow-lg shadow-black/40 cursor-grab active:cursor-grabbing transition-[transform,box-shadow] duration-150",
+                      active
+                        ? "bg-primary text-primary-foreground ring-2 ring-primary/50"
+                        : "bg-primary/90 text-primary-foreground hover:shadow-glow"
+                    )}
+                    onClick={() => setSelectedDeskId(desk.id)}
                   >
                     {desk.name}
                   </Rnd>
                 );
               })}
+            </div>
+
+            <div className="mt-4 grid gap-3 rounded-2xl border border-white/[0.06] bg-secondary/70 p-4 shadow-subtle md:grid-cols-[1fr_auto]">
+              <div className="space-y-3">
+                <div className="text-xs font-semibold text-foreground/90">Selected desk</div>
+                {!selectedDesk && <div className="text-xs text-muted-foreground">Click a desk on the map.</div>}
+                {selectedDesk && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <Label htmlFor="edit-name">Name</Label>
+                      <Input id="edit-name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="edit-room">Room</Label>
+                      <Input id="edit-room" value={editRoom} onChange={(e) => setEditRoom(e.target.value)} />
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-end gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={!selectedDesk || updateDeskDetailsMutation.isPending}
+                  onClick={() => {
+                    if (!selectedDesk) return;
+                    updateDeskDetailsMutation.mutate({ ...selectedDesk, name: editName, room: editRoom });
+                  }}
+                >
+                  {updateDeskDetailsMutation.isPending ? "Saving…" : "Save"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!selectedDesk || deleteDeskMutation.isPending}
+                  onClick={() => {
+                    if (!selectedDesk) return;
+                    deleteDeskMutation.mutate(selectedDesk.id);
+                  }}
+                >
+                  {deleteDeskMutation.isPending ? "Deleting…" : "Delete"}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -171,6 +264,12 @@ export default function AdminPanelPage() {
                     <div className="text-xs text-muted-foreground">
                       {new Date(r.start_time).toLocaleString()} – {new Date(r.end_time).toLocaleString()}
                     </div>
+                    {r.user_name && (
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        Booked by <span className="text-foreground/85">{r.user_name}</span>
+                        {r.user_email ? <span className="text-muted-foreground"> · {r.user_email}</span> : null}
+                      </div>
+                    )}
                   </div>
                   <Button
                     variant="ghost"

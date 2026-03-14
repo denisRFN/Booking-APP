@@ -92,12 +92,36 @@ export default function DashboardPage() {
               <CardTitle className="font-display font-bold">Calendar</CardTitle>
               <CardDescription>Your upcoming reservations.</CardDescription>
             </CardHeader>
-            <CardContent className="h-[620px] min-h-[520px] flex flex-col">
-              <CalendarView
-                events={events}
-                defaultDate={selectedDate}
-                onNavigate={(d) => setSelectedDate(d)}
-              />
+            <CardContent className="flex flex-col gap-4">
+              <div className="w-full max-w-[520px] aspect-square">
+                <CalendarView
+                  events={events}
+                  defaultDate={selectedDate}
+                  onNavigate={(d) => setSelectedDate(d)}
+                />
+              </div>
+              <div className="rounded-2xl border border-white/[0.06] bg-secondary/70 p-4 shadow-subtle">
+                <div className="text-xs font-semibold text-foreground/90">Next reservations</div>
+                <div className="mt-2 space-y-2 text-sm">
+                  {reservationsQuery.isLoading && (
+                    <div className="text-xs text-muted-foreground">Loading…</div>
+                  )}
+                  {!reservationsQuery.isLoading &&
+                    (reservationsQuery.data?.slice(0, 3).map((r) => (
+                      <div key={r.id} className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate font-medium">{r.desk_name} · {r.room}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(r.start_time).toLocaleString()} – {new Date(r.end_time).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    )) ?? null)}
+                  {!reservationsQuery.isLoading && !reservationsQuery.data?.length && (
+                    <div className="text-xs text-muted-foreground">No reservations yet.</div>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
