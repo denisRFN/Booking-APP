@@ -141,3 +141,11 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.03);
 }
 
+/* Square calendar container polish */
+.calendar-theme .rbc-calendar {
+  border-radius: inherit;
+}
+.calendar-theme .rbc-toolbar {
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+

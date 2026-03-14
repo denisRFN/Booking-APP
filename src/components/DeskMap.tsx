@@ -18,7 +18,7 @@ export function DeskMap({ desks, onSelectDesk }: DeskMapProps) {
   };
 
   return (
-    <div className="relative h-full min-h-[500px] w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-glass backdrop-blur-xl ring-1 ring-white/[0.03]">
+    <div className="relative h-full w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-glass backdrop-blur-xl ring-1 ring-white/[0.03]">
       <div className="office-map-surface relative w-full h-full rounded-xl border border-border overflow-hidden bg-gradient-to-br from-secondary to-background">
         {desks.map((desk) => {
           // position_x / position_y are stored as center coordinates (0-100)

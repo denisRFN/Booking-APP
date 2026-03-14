@@ -154,10 +154,12 @@ export default function AdminPanelPage() {
                 </Button>
               </div>
             </div>
-            <div
-              ref={mapRef}
-              className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-secondary/90 shadow-glass backdrop-blur-xl"
-            >
+            {/* Same aspect ratio (16/10) as Dashboard Office map so layout is 1:1 */}
+            <div className="w-full aspect-[16/10] min-h-[320px] rounded-2xl overflow-hidden">
+              <div
+                ref={mapRef}
+                className="relative w-full h-full overflow-hidden rounded-2xl border border-white/[0.08] bg-secondary/90 shadow-glass backdrop-blur-xl"
+              >
               {desksQuery.data?.map((desk) => {
                 const rect = mapRef.current?.getBoundingClientRect();
                 const w = rect?.width ?? 1;
@@ -199,6 +201,7 @@ export default function AdminPanelPage() {
                   </Rnd>
                 );
               })}
+              </div>
             </div>
 
             <div className="mt-4 grid gap-3 rounded-2xl border border-white/[0.06] bg-secondary/70 p-4 shadow-subtle md:grid-cols-[1fr_auto]">

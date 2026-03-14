@@ -78,22 +78,26 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="h-[620px] min-h-[520px]">
-              {availabilityQuery.isLoading && <p className="text-sm text-muted-foreground">Loading desks...</p>}
-              {availabilityQuery.data && (
-                <DeskMap desks={availabilityQuery.data} onSelectDesk={handleDeskClick} />
-              )}
+            <CardContent className="flex flex-col">
+              {/* Same aspect ratio as Admin desk layout so the map is 1:1 */}
+              <div className="w-full aspect-[16/10] min-h-[320px] overflow-hidden">
+                {availabilityQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
+                {availabilityQuery.data && (
+                  <DeskMap desks={availabilityQuery.data} onSelectDesk={handleDeskClick} />
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
-        <div className="space-y-4 min-w-0">
+        <div className="space-y-4 min-w-0 flex flex-col">
           <Card className="opacity-0 animate-stagger-2">
             <CardHeader>
               <CardTitle className="font-display font-bold">Calendar</CardTitle>
               <CardDescription>Your upcoming reservations.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <div className="w-full max-w-[520px] aspect-square">
+              {/* Square calendar, top-right */}
+              <div className="w-full max-w-[400px] aspect-square mx-auto lg:mx-0 lg:mr-0 rounded-2xl overflow-hidden border border-white/[0.08] bg-gradient-to-br from-card/90 to-secondary/80 shadow-glow ring-1 ring-primary/10">
                 <CalendarView
                   events={events}
                   defaultDate={selectedDate}
