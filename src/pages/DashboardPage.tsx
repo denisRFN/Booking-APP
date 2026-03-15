@@ -8,6 +8,7 @@ import { AvailabilityDesk, Desk, Reservation } from "../types/api";
 import { useAuth } from "../hooks/useAuth";
 import { DeskMap } from "../components/DeskMap";
 import { EditableDeskMap } from "../components/EditableDeskMap";
+import { DeskEditorDialog } from "../components/DeskEditorDialog";
 import { ReservationModal } from "../components/ReservationModal";
 import { CalendarView } from "../components/CalendarView";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../components/ui/card";
@@ -22,6 +23,9 @@ export default function DashboardPage() {
   const [selectedDesk, setSelectedDesk] = useState<AvailabilityDesk | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [editingDesk, setEditingDesk] = useState<Desk | null>(null);
+  const [deskEditorOpen, setDeskEditorOpen] = useState(false);
 
   const availabilityQuery = useQuery({
     queryKey: ["availability", selectedDate.toDateString()],
@@ -66,8 +70,55 @@ export default function DashboardPage() {
     }
   });
 
+  const updateDeskDetailsMutation = useMutation({
+    mutationFn: async ({ desk, name, room }: { desk: Desk; name: string; room: string }) => {
+      await apiClient.put(`/desks/${desk.id}`, { name, room });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["desks"] });
+      queryClient.invalidateQueries({ queryKey: ["availability"] });
+    }
+  });
+
+  const createDeskMutation = useMutation({
+    mutationFn: async () => {
+      const x = 15 + Math.floor(Math.random() * 70);
+      const y = 15 + Math.floor(Math.random() * 70);
+      const { data } = await apiClient.post<Desk>("/desks", {
+        name: "New desk",
+        position_x: x,
+        position_y: y,
+        room: "Open space"
+      });
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["desks"] });
+      queryClient.invalidateQueries({ queryKey: ["availability"] });
+      setEditingDesk(data);
+      setDeskEditorOpen(true);
+    }
+  });
+
+  const deleteDeskMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiClient.delete(`/desks/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["desks"] });
+      queryClient.invalidateQueries({ queryKey: ["availability"] });
+      setEditingDesk(null);
+      setDeskEditorOpen(false);
+    }
+  });
+
   const handlePositionChange = (desk: Desk, position_x: number, position_y: number) => {
     updateDeskPositionMutation.mutate({ ...desk, position_x, position_y });
+  };
+
+  const handleDeskClickEdit = (desk: Desk) => {
+    setEditingDesk(desk);
+    setDeskEditorOpen(true);
   };
 
   const handleDeskClick = (desk: AvailabilityDesk) => {
@@ -84,11 +135,34 @@ export default function DashboardPage() {
       room: r.room
     })) ?? [];
 
+  const freeDesks = availabilityQuery.data?.filter((d) => d.status === "available") ?? [];
+
   return (
     <MainLayout>
-      <div className="grid gap-6 lg:grid-cols-[2.2fr_1fr] items-stretch">
-        <div className="space-y-4 min-w-0">
-          <Card className="opacity-0 animate-stagger-1">
+      <div className="flex flex-col gap-6">
+        {/* Calendar full-width at top */}
+        <Card className="opacity-0 animate-stagger-1">
+          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+            <div>
+              <CardTitle className="font-display font-bold">Calendar</CardTitle>
+              <CardDescription>Your reservations · Day / Week / Month</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full h-[320px] rounded-2xl overflow-hidden border border-white/[0.08] bg-gradient-to-br from-card/90 to-secondary/80 shadow-glow ring-1 ring-primary/10">
+              <CalendarView
+                events={events}
+                defaultDate={selectedDate}
+                onNavigate={(d) => setSelectedDate(d)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Office map + sidebar */}
+        <div className="grid gap-6 lg:grid-cols-[2.2fr_1fr] items-stretch">
+          <div className="space-y-4 min-w-0">
+            <Card className="opacity-0 animate-stagger-2">
             <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
               <div>
                 <CardTitle className="font-display font-bold">Office map</CardTitle>
@@ -98,13 +172,34 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {isAdmin && (
-                  <Button
-                    variant={editMode ? "default" : "secondary"}
-                    size="sm"
-                    onClick={() => setEditMode((e) => !e)}
-                  >
-                    {editMode ? "Done editing" : "Enable edit"}
-                  </Button>
+                  <>
+                    <Button
+                      variant={editMode ? "default" : "secondary"}
+                      size="sm"
+                      onClick={() => setEditMode((e) => !e)}
+                    >
+                      {editMode ? "Done editing" : "Enable edit"}
+                    </Button>
+                    {editMode && (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => createDeskMutation.mutate()}
+                          disabled={createDeskMutation.isPending}
+                        >
+                          {createDeskMutation.isPending ? "Adding…" : "Add desk"}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSnapToGrid((s) => !s)}
+                        >
+                          Snap to grid {snapToGrid ? "ON" : "OFF"}
+                        </Button>
+                      </>
+                    )}
+                  </>
                 )}
                 {!editMode && (
                   <>
@@ -134,7 +229,10 @@ export default function DashboardPage() {
                     {desksQuery.data && (
                       <EditableDeskMap
                         desks={desksQuery.data}
+                        snapToGrid={snapToGrid}
                         onPositionChange={handlePositionChange}
+                        onDeskClick={handleDeskClickEdit}
+                        selectedDeskId={editingDesk?.id ?? null}
                       />
                     )}
                   </>
@@ -150,30 +248,55 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-        <div className="space-y-4 min-w-0 flex flex-col">
-          <Card className="opacity-0 animate-stagger-2">
-            <CardHeader>
-              <CardTitle className="font-display font-bold">Calendar</CardTitle>
-              <CardDescription>Your upcoming reservations.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              {/* Square calendar, top-right */}
-              <div className="w-full max-w-[400px] aspect-square mx-auto lg:mx-0 lg:mr-0 rounded-2xl overflow-hidden border border-white/[0.08] bg-gradient-to-br from-card/90 to-secondary/80 shadow-glow ring-1 ring-primary/10">
-                <CalendarView
-                  events={events}
-                  defaultDate={selectedDate}
-                  onNavigate={(d) => setSelectedDate(d)}
-                />
-              </div>
-              <div className="rounded-2xl border border-white/[0.06] bg-secondary/70 p-4 shadow-subtle">
-                <div className="text-xs font-semibold text-foreground/90">Next reservations</div>
-                <div className="mt-2 space-y-2 text-sm">
+          <div className="space-y-4 min-w-0 flex flex-col">
+            <Card className="opacity-0 animate-stagger-2 rounded-2xl border border-white/[0.06] bg-card/80 backdrop-blur-md shadow-glass">
+              <CardHeader>
+                <CardTitle className="font-display font-bold text-sm">Find free desk</CardTitle>
+                <CardDescription>
+                  Desks free on {selectedDate.toLocaleDateString()}. Click one on the map to reserve.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {availabilityQuery.isLoading && (
+                  <div className="text-xs text-muted-foreground">Loading…</div>
+                )}
+                {!availabilityQuery.isLoading && freeDesks.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {freeDesks.map((d) => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDesk(d);
+                          setModalOpen(true);
+                        }}
+                        className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                      >
+                        {d.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {!availabilityQuery.isLoading && freeDesks.length === 0 && availabilityQuery.data?.length !== 0 && (
+                  <div className="text-xs text-muted-foreground">No free desks this day.</div>
+                )}
+                {!availabilityQuery.isLoading && availabilityQuery.data?.length === 0 && (
+                  <div className="text-xs text-muted-foreground">No desks configured.</div>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl border border-white/[0.06] bg-card/80 backdrop-blur-md shadow-glass">
+              <CardHeader>
+                <CardTitle className="font-display font-bold text-sm">Next reservations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-sm">
                   {reservationsQuery.isLoading && (
                     <div className="text-xs text-muted-foreground">Loading…</div>
                   )}
                   {!reservationsQuery.isLoading &&
-                    (reservationsQuery.data?.slice(0, 3).map((r) => (
-                      <div key={r.id} className="flex items-start justify-between gap-3">
+                    (reservationsQuery.data?.slice(0, 5).map((r) => (
+                      <div key={r.id} className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.04] bg-secondary/50 px-3 py-2">
                         <div className="min-w-0">
                           <div className="truncate font-medium">{r.desk_name} · {r.room}</div>
                           <div className="text-xs text-muted-foreground">
@@ -186,9 +309,9 @@ export default function DashboardPage() {
                     <div className="text-xs text-muted-foreground">No reservations yet.</div>
                   )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
       <ReservationModal
@@ -200,6 +323,15 @@ export default function DashboardPage() {
           availabilityQuery.refetch();
           reservationsQuery.refetch();
         }}
+      />
+      <DeskEditorDialog
+        open={deskEditorOpen}
+        onOpenChange={setDeskEditorOpen}
+        desk={editingDesk}
+        onSave={(desk, name, room) => updateDeskDetailsMutation.mutate({ desk, name, room })}
+        onDelete={(desk) => deleteDeskMutation.mutate(desk.id)}
+        isSaving={updateDeskDetailsMutation.isPending}
+        isDeleting={deleteDeskMutation.isPending}
       />
     </MainLayout>
   );

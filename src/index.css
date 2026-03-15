@@ -30,6 +30,12 @@ body {
   @apply bg-card/80 backdrop-blur-md border border-white/[0.06] shadow-glass rounded-2xl;
 }
 
+/* Smoother panel hover */
+.glass-card:hover,
+[class*="shadow-glass"]:hover {
+  @apply border-white/[0.08];
+}
+
 /* Office map: subtle grid and depth */
 .office-map-surface {
   background-image:

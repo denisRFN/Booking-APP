@@ -43,7 +43,7 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
         localizer={localizer}
         events={rbcEvents}
         defaultView="week"
-        views={["day", "week"]}
+        views={["day", "week", "month"]}
         defaultDate={defaultDate}
         onNavigate={onNavigate}
         onView={onViewChange}
