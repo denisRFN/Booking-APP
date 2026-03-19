@@ -7,6 +7,7 @@ import { apiClient } from "../services/apiClient";
 import { AvailabilityDesk, Desk, Reservation } from "../types/api";
 import { useAuth } from "../hooks/useAuth";
 import { useOfficeMapImage } from "../hooks/useOfficeMapImage";
+import { useDeskRotations } from "../hooks/useDeskRotations";
 import { DeskMap } from "../components/DeskMap";
 import { EditableDeskMap } from "../components/EditableDeskMap";
 import { DeskEditorDialog } from "../components/DeskEditorDialog";
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const queryClient = useQueryClient();
   const isAdmin = user?.role === "admin";
   const { imageUrl: officeMapImageUrl, setImageUrl: setOfficeMapImageUrl } = useOfficeMapImage();
+  const { getRotation, setRotation } = useDeskRotations();
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedDesk, setSelectedDesk] = useState<AvailabilityDesk | null>(null);
@@ -290,6 +292,7 @@ export default function DashboardPage() {
                         onDeskClick={handleDeskClickEdit}
                         selectedDeskId={editingDesk?.id ?? null}
                         backgroundImageUrl={officeMapImageUrl}
+                        getRotationDeg={getRotation}
                       />
                     )}
                   </>
@@ -301,6 +304,7 @@ export default function DashboardPage() {
                         desks={availabilityQuery.data}
                         onSelectDesk={handleDeskClick}
                         backgroundImageUrl={officeMapImageUrl}
+                        getRotationDeg={getRotation}
                       />
                     )}
                   </>
@@ -411,6 +415,8 @@ export default function DashboardPage() {
         desk={editingDesk}
         onSave={(desk, name, room) => updateDeskDetailsMutation.mutate({ desk, name, room })}
         onDelete={(desk) => deleteDeskMutation.mutate(desk.id)}
+        rotationDeg={editingDesk ? getRotation(editingDesk.id) : 0}
+        onRotate={(desk, rotationDeg) => setRotation(desk.id, rotationDeg)}
         isSaving={updateDeskDetailsMutation.isPending}
         isDeleting={deleteDeskMutation.isPending}
       />

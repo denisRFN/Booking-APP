@@ -6,9 +6,10 @@ interface DeskMapProps {
   desks: AvailabilityDesk[];
   onSelectDesk: (desk: AvailabilityDesk) => void;
   backgroundImageUrl?: string | null;
+  getRotationDeg?: (deskId: number) => number;
 }
 
-export function DeskMap({ desks, onSelectDesk, backgroundImageUrl }: DeskMapProps) {
+export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDeg }: DeskMapProps) {
   const clampPct = (v: number) => Math.max(3, Math.min(97, v));
   const fmtRange = (from?: string | null, to?: string | null) => {
     if (!from || !to) return null;
@@ -61,6 +62,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl }: DeskMapProp
                   "group relative flex h-12 min-w-[6.5rem] px-3 items-center justify-center rounded-lg text-sm font-semibold shadow-lg shadow-black/40 transition-all duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   colorClasses
                 )}
+                style={getRotationDeg ? { transform: `rotate(${getRotationDeg(desk.id)}deg)` } : undefined}
               >
                 {desk.name}
                 {(desk.status !== "available") && (bookedBy || bookedRange) && (

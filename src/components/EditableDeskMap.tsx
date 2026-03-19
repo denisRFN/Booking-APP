@@ -48,6 +48,7 @@ interface EditableDeskMapProps {
   onDeskClick?: (desk: Desk) => void;
   selectedDeskId?: number | null;
   backgroundImageUrl?: string | null;
+  getRotationDeg?: (deskId: number) => number;
 }
 
 export function EditableDeskMap({
@@ -56,7 +57,8 @@ export function EditableDeskMap({
   onPositionChange,
   onDeskClick,
   selectedDeskId,
-  backgroundImageUrl
+  backgroundImageUrl,
+  getRotationDeg
 }: EditableDeskMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ w: 400, h: 250 });
@@ -210,7 +212,12 @@ export function EditableDeskMap({
                   onDeskClick?.(desk);
                 }}
               >
-                {desk.name}
+                <div
+                  className="flex h-full w-full items-center justify-center"
+                  style={getRotationDeg ? { transform: `rotate(${getRotationDeg(desk.id)}deg)` } : undefined}
+                >
+                  {desk.name}
+                </div>
               </Rnd>
             );
           })}

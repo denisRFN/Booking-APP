@@ -17,6 +17,8 @@ interface DeskEditorDialogProps {
   desk: Desk | null;
   onSave: (desk: Desk, name: string, room: string) => void;
   onDelete: (desk: Desk) => void;
+  rotationDeg?: number;
+  onRotate?: (desk: Desk, rotationDeg: number) => void;
   isSaving?: boolean;
   isDeleting?: boolean;
 }
@@ -27,6 +29,8 @@ export function DeskEditorDialog({
   desk,
   onSave,
   onDelete,
+  rotationDeg,
+  onRotate,
   isSaving,
   isDeleting
 }: DeskEditorDialogProps) {
@@ -51,6 +55,8 @@ export function DeskEditorDialog({
     onDelete(desk);
     onOpenChange(false);
   };
+
+  const r = rotationDeg ?? 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -77,6 +83,38 @@ export function DeskEditorDialog({
               onChange={(e) => setRoom(e.target.value)}
               placeholder="e.g. Open Space"
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Rotation</Label>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => onRotate?.(desk, (r + 270) % 360)}
+                disabled={!onRotate}
+              >
+                ⟲ 90°
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => onRotate?.(desk, (r + 90) % 360)}
+                disabled={!onRotate}
+              >
+                ⟳ 90°
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => onRotate?.(desk, 0)}
+                disabled={!onRotate}
+              >
+                Reset ({r}°)
+              </Button>
+            </div>
           </div>
           <div className="flex gap-2 pt-2">
             <Button
