@@ -75,11 +75,26 @@ export default function DashboardPage() {
   }, [draftDesks, desksQuery.data]);
 
   const updateDeskPositionMutation = useMutation({
-    mutationFn: async (desk: Desk & { position_x: number; position_y: number }) => {
-      await apiClient.put(`/desks/${desk.id}`, {
+    mutationFn: async (desk: Desk & { position_x: number; position_y: number; rotation_deg?: number }) => {
+      const payload: { position_x: number; position_y: number; rotation_deg?: number } = {
         position_x: desk.position_x,
         position_y: desk.position_y
-      });
+      };
+      if (typeof desk.rotation_deg !== "undefined") {
+        payload.rotation_deg = desk.rotation_deg;
+      }
+      await apiClient.put(`/desks/${desk.id}`, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["desks"] });
+      queryClient.invalidateQueries({ queryKey: ["availability"] });
+    }
+  });
+
+  const updateDeskRotationMutation = useMutation({
+    mutationFn: async ({ deskId, rotation_deg }: { deskId: number; rotation_deg: number }) => {
+      // Admin-only mutation via JWT interceptor.
+      await apiClient.put(`/desks/${deskId}`, { rotation_deg });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["desks"] });
@@ -168,6 +183,33 @@ export default function DashboardPage() {
     return `${startLabel} – ${endLabel}`;
   }, [selectedDate]);
 
+  const backendSupportsDeskRotation = useMemo(() => {
+    const first = desksQuery.data?.[0] as (Desk & { rotation_deg?: number }) | undefined;
+    return typeof first?.rotation_deg !== "undefined";
+  }, [desksQuery.data]);
+
+  const rotationByIdAvailability = useMemo(() => {
+    const m = new Map<number, number>();
+    (availabilityQuery.data ?? []).forEach((d) => {
+      if (typeof d.rotation_deg === "number") m.set(d.id, d.rotation_deg);
+    });
+    return m;
+  }, [availabilityQuery.data]);
+
+  const rotationByIdEditor = useMemo(() => {
+    const m = new Map<number, number>();
+    (desksQuery.data ?? []).forEach((d) => {
+      if (typeof d.rotation_deg === "number") m.set(d.id, d.rotation_deg);
+    });
+    return m;
+  }, [desksQuery.data]);
+
+  const getRotationDegAvailability = (deskId: number) =>
+    rotationByIdAvailability.get(deskId) ?? getRotation(deskId);
+
+  const getRotationDegEditor = (deskId: number) =>
+    rotationByIdEditor.get(deskId) ?? getRotation(deskId);
+
   const handleEnterEditMode = () => {
     setEditMode(true);
     if (desksQuery.data) {
@@ -190,7 +232,8 @@ export default function DashboardPage() {
       updateDeskPositionMutation.mutate({
         ...desk,
         position_x: desk.position_x,
-        position_y: desk.position_y
+        position_y: desk.position_y,
+        ...(backendSupportsDeskRotation ? { rotation_deg: getRotation(desk.id) } : {})
       });
     });
   };
@@ -301,7 +344,7 @@ export default function DashboardPage() {
                         onDeskClick={handleDeskClickEdit}
                         selectedDeskId={editingDesk?.id ?? null}
                         backgroundImageUrl={officeMapImageUrl}
-                        getRotationDeg={getRotation}
+                        getRotationDeg={getRotationDegEditor}
                       />
                     )}
                   </>
@@ -313,7 +356,7 @@ export default function DashboardPage() {
                         desks={availabilityQuery.data}
                         onSelectDesk={handleDeskClick}
                         backgroundImageUrl={officeMapImageUrl}
-                        getRotationDeg={getRotation}
+                        getRotationDeg={getRotationDegAvailability}
                       />
                     )}
                   </>
@@ -427,7 +470,11 @@ export default function DashboardPage() {
         onSave={(desk, name, room) => updateDeskDetailsMutation.mutate({ desk, name, room })}
         onDelete={(desk) => deleteDeskMutation.mutate(desk.id)}
         rotationDeg={editingDesk ? getRotation(editingDesk.id) : 0}
-        onRotate={(desk, rotationDeg) => setRotation(desk.id, rotationDeg)}
+        onRotate={(desk, rotationDeg) => {
+          // Update UI immediately (local) and persist in backend (cloud).
+          setRotation(desk.id, rotationDeg);
+          updateDeskRotationMutation.mutate({ deskId: desk.id, rotation_deg: rotationDeg });
+        }}
         isSaving={updateDeskDetailsMutation.isPending}
         isDeleting={deleteDeskMutation.isPending}
       />

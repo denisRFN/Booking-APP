@@ -50,7 +50,7 @@ export function OfficeMapSettingsDialog({
         <DialogHeader>
           <DialogTitle className="font-display font-bold">Office map image</DialogTitle>
           <DialogDescription>
-            Set a JPG/PNG background for the map. This is stored locally in your browser for now.
+            Set a JPG/PNG background for the map. This is saved in the cloud (backend) settings.
           </DialogDescription>
         </DialogHeader>
 

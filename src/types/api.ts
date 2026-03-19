@@ -4,6 +4,7 @@ export interface Desk {
   position_x: number;
   position_y: number;
   room: string;
+  rotation_deg?: number;
 }
 
 export interface AvailabilityDesk {
@@ -13,6 +14,7 @@ export interface AvailabilityDesk {
   position_y: number;
   room: string;
   status: "available" | "occupied" | "mine";
+  rotation_deg?: number;
   booked_by_name?: string | null;
   booked_by_email?: string | null;
   booked_from?: string | null;
