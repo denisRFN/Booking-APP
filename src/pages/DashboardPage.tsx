@@ -26,7 +26,7 @@ export default function DashboardPage() {
   const [selectedDesk, setSelectedDesk] = useState<AvailabilityDesk | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [snapToGrid, setSnapToGrid] = useState(false);
   const [editingDesk, setEditingDesk] = useState<Desk | null>(null);
   const [deskEditorOpen, setDeskEditorOpen] = useState(false);
   const [mapSettingsOpen, setMapSettingsOpen] = useState(false);
@@ -187,29 +187,10 @@ export default function DashboardPage() {
   return (
     <MainLayout>
       <div className="flex flex-col gap-6">
-        {/* Calendar full-width at top */}
-        <Card className="opacity-0 animate-stagger-1">
-          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
-            <div>
-              <CardTitle className="font-display font-bold">Calendar</CardTitle>
-              <CardDescription>Your reservations · Day / Week / Month</CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full h-[320px] rounded-2xl overflow-hidden border border-white/[0.08] bg-gradient-to-br from-card/90 to-secondary/80 shadow-glow ring-1 ring-primary/10">
-              <CalendarView
-                events={events}
-                defaultDate={selectedDate}
-                onNavigate={(d) => setSelectedDate(d)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Office map + sidebar */}
-        <div className="grid gap-6 lg:grid-cols-[2.2fr_1fr] items-stretch">
+        {/* Office map + right column (calendar, lists) */}
+        <div className="grid gap-6 lg:grid-cols-[2.4fr_1.4fr] items-start">
           <div className="space-y-4 min-w-0">
-            <Card className="opacity-0 animate-stagger-2">
+            <Card className="opacity-0 animate-stagger-1">
             <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
               <div>
                 <CardTitle className="font-display font-bold">Office map</CardTitle>
@@ -297,7 +278,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="flex flex-col">
-              <div className="w-full aspect-[16/9] min-h-[420px] overflow-hidden">
+              <div className="w-full aspect-[18/9] min-h-[440px] overflow-hidden">
                 {editMode ? (
                   <>
                     {desksQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
@@ -329,6 +310,26 @@ export default function DashboardPage() {
           </Card>
         </div>
           <div className="space-y-4 min-w-0 flex flex-col">
+            {/* Calendar top-right */}
+            <Card className="opacity-0 animate-stagger-1 rounded-2xl border border-white/[0.06] bg-card/80 backdrop-blur-md shadow-glass">
+              <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+                <div>
+                  <CardTitle className="font-display font-bold text-sm">Your reservations</CardTitle>
+                  <CardDescription>Day / Week / Month overview.</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full h-[260px] rounded-2xl overflow-hidden border border-white/[0.08] bg-gradient-to-br from-card/90 to-secondary/80 shadow-glow ring-1 ring-primary/10">
+                  <CalendarView
+                    events={events}
+                    defaultDate={selectedDate}
+                    onNavigate={(d) => setSelectedDate(d)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Find free desk */}
             <Card className="opacity-0 animate-stagger-2 rounded-2xl border border-white/[0.06] bg-card/80 backdrop-blur-md shadow-glass">
               <CardHeader>
                 <CardTitle className="font-display font-bold text-sm">Find free desk</CardTitle>

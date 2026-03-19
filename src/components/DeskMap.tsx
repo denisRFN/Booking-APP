@@ -58,7 +58,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl }: DeskMapProp
                 type="button"
                 onClick={() => onSelectDesk(desk)}
                 className={cn(
-                  "group relative flex h-9 w-16 items-center justify-center rounded-xl text-xs font-semibold shadow-lg shadow-black/40 transition-all duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                  "group relative flex h-8 px-3 min-w-[52px] items-center justify-center rounded-full text-[11px] font-semibold shadow-lg shadow-black/40 transition-all duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   colorClasses
                 )}
               >
