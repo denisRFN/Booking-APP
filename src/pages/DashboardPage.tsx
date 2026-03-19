@@ -6,6 +6,7 @@ import { MainLayout } from "../layouts/MainLayout";
 import { apiClient } from "../services/apiClient";
 import { AvailabilityDesk, Desk, Reservation } from "../types/api";
 import { useAuth } from "../hooks/useAuth";
+import { useOfficeMapImage } from "../hooks/useOfficeMapImage";
 import { DeskMap } from "../components/DeskMap";
 import { EditableDeskMap } from "../components/EditableDeskMap";
 import { DeskEditorDialog } from "../components/DeskEditorDialog";
@@ -13,11 +14,13 @@ import { ReservationModal } from "../components/ReservationModal";
 import { CalendarView } from "../components/CalendarView";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
+import { OfficeMapSettingsDialog } from "../components/OfficeMapSettingsDialog";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const isAdmin = user?.role === "admin";
+  const { imageUrl: officeMapImageUrl, setImageUrl: setOfficeMapImageUrl } = useOfficeMapImage();
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedDesk, setSelectedDesk] = useState<AvailabilityDesk | null>(null);
@@ -26,6 +29,7 @@ export default function DashboardPage() {
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [editingDesk, setEditingDesk] = useState<Desk | null>(null);
   const [deskEditorOpen, setDeskEditorOpen] = useState(false);
+  const [mapSettingsOpen, setMapSettingsOpen] = useState(false);
 
   const availabilityQuery = useQuery({
     queryKey: ["availability", selectedDate.toDateString()],
@@ -191,6 +195,13 @@ export default function DashboardPage() {
                           {createDeskMutation.isPending ? "Adding…" : "Add desk"}
                         </Button>
                         <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setMapSettingsOpen(true)}
+                        >
+                          Map image
+                        </Button>
+                        <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => setSnapToGrid((s) => !s)}
@@ -233,6 +244,7 @@ export default function DashboardPage() {
                         onPositionChange={handlePositionChange}
                         onDeskClick={handleDeskClickEdit}
                         selectedDeskId={editingDesk?.id ?? null}
+                        backgroundImageUrl={officeMapImageUrl}
                       />
                     )}
                   </>
@@ -240,7 +252,11 @@ export default function DashboardPage() {
                   <>
                     {availabilityQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
                     {availabilityQuery.data && (
-                      <DeskMap desks={availabilityQuery.data} onSelectDesk={handleDeskClick} />
+                      <DeskMap
+                        desks={availabilityQuery.data}
+                        onSelectDesk={handleDeskClick}
+                        backgroundImageUrl={officeMapImageUrl}
+                      />
                     )}
                   </>
                 )}
@@ -332,6 +348,12 @@ export default function DashboardPage() {
         onDelete={(desk) => deleteDeskMutation.mutate(desk.id)}
         isSaving={updateDeskDetailsMutation.isPending}
         isDeleting={deleteDeskMutation.isPending}
+      />
+      <OfficeMapSettingsDialog
+        open={mapSettingsOpen}
+        onOpenChange={setMapSettingsOpen}
+        value={officeMapImageUrl}
+        onChange={(next) => setOfficeMapImageUrl(next)}
       />
     </MainLayout>
   );

@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { Button } from "./ui/button";
 import { cn } from "../lib/utils";
 import { AvailabilityDesk } from "../types/api";
@@ -6,9 +5,10 @@ import { AvailabilityDesk } from "../types/api";
 interface DeskMapProps {
   desks: AvailabilityDesk[];
   onSelectDesk: (desk: AvailabilityDesk) => void;
+  backgroundImageUrl?: string | null;
 }
 
-export function DeskMap({ desks, onSelectDesk }: DeskMapProps) {
+export function DeskMap({ desks, onSelectDesk, backgroundImageUrl }: DeskMapProps) {
   const clampPct = (v: number) => Math.max(8, Math.min(92, v));
   const fmtRange = (from?: string | null, to?: string | null) => {
     if (!from || !to) return null;
@@ -20,6 +20,17 @@ export function DeskMap({ desks, onSelectDesk }: DeskMapProps) {
   return (
     <div className="relative h-full w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-glass backdrop-blur-xl ring-1 ring-white/[0.03]">
       <div className="office-map-surface relative w-full h-full rounded-xl border border-border overflow-hidden bg-gradient-to-br from-secondary to-background">
+        {backgroundImageUrl ? (
+          <>
+            <img
+              src={backgroundImageUrl}
+              alt="Office map"
+              className="absolute inset-0 h-full w-full object-cover opacity-70"
+              draggable={false}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-black/35" />
+          </>
+        ) : null}
         {desks.map((desk) => {
           // position_x / position_y are stored as center coordinates (0-100)
           const left = clampPct(desk.position_x);

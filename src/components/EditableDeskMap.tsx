@@ -47,6 +47,7 @@ interface EditableDeskMapProps {
   onPositionChange: (desk: Desk, position_x: number, position_y: number) => void;
   onDeskClick?: (desk: Desk) => void;
   selectedDeskId?: number | null;
+  backgroundImageUrl?: string | null;
 }
 
 export function EditableDeskMap({
@@ -54,10 +55,15 @@ export function EditableDeskMap({
   snapToGrid: snapEnabled,
   onPositionChange,
   onDeskClick,
-  selectedDeskId
+  selectedDeskId,
+  backgroundImageUrl
 }: EditableDeskMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ w: 400, h: 250 });
+  const [scale, setScale] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const panStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
 
   useEffect(() => {
     const el = mapRef.current;
@@ -86,13 +92,68 @@ export function EditableDeskMap({
     [desks, snapEnabled]
   );
 
+  const zoomBy = (delta: number) => {
+    setScale((s) => clamp(Number((s + delta).toFixed(2)), 0.6, 2.4));
+  };
+
+  const resetView = () => {
+    setScale(1);
+    setPan({ x: 0, y: 0 });
+  };
+
   return (
     <div className="relative h-full w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-glass backdrop-blur-xl ring-1 ring-white/[0.03]">
       <div className="office-map-surface relative w-full h-full rounded-xl border border-border overflow-hidden bg-gradient-to-br from-secondary to-background">
         <div
           ref={mapRef}
           className="absolute inset-0 w-full h-full overflow-hidden rounded-xl"
+          onWheel={(e) => {
+            if (!e.ctrlKey) return;
+            e.preventDefault();
+            const dir = e.deltaY > 0 ? -1 : 1;
+            zoomBy(dir * 0.12);
+          }}
+          onMouseDown={(e) => {
+            if (e.button !== 0) return;
+            if (!e.altKey) return;
+            setIsPanning(true);
+            panStartRef.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+          }}
+          onMouseMove={(e) => {
+            if (!isPanning) return;
+            const start = panStartRef.current;
+            if (!start) return;
+            const dx = e.clientX - start.x;
+            const dy = e.clientY - start.y;
+            setPan({ x: start.panX + dx, y: start.panY + dy });
+          }}
+          onMouseUp={() => {
+            setIsPanning(false);
+            panStartRef.current = null;
+          }}
+          onMouseLeave={() => {
+            setIsPanning(false);
+            panStartRef.current = null;
+          }}
         >
+          <div
+            className="absolute inset-0"
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+              transformOrigin: "50% 50%"
+            }}
+          >
+            {backgroundImageUrl ? (
+              <>
+                <img
+                  src={backgroundImageUrl}
+                  alt="Office map"
+                  className="absolute inset-0 h-full w-full object-cover opacity-70"
+                  draggable={false}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-black/35" />
+              </>
+            ) : null}
           {desks.map((desk) => {
             const w = size.w;
             const h = size.h;
@@ -115,6 +176,7 @@ export function EditableDeskMap({
                 size={{ width: DESK_W, height: DESK_H }}
                 bounds="parent"
                 position={{ x: clamp(x, 0, w - DESK_W), y: clamp(y, 0, h - DESK_H) }}
+                scale={scale}
                 onDragStop={(_, d) => {
                   const w2 = size.w;
                   const h2 = size.h;
@@ -152,9 +214,38 @@ export function EditableDeskMap({
               </Rnd>
             );
           })}
+          </div>
         </div>
-        <div className="absolute bottom-3 left-3 rounded-full bg-card/90 px-3 py-1.5 text-[11px] text-muted-foreground shadow-subtle backdrop-blur-md border border-white/[0.04]">
-          Drag to reposition · Click desk to rename or delete
+        <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-card/90 px-3 py-1.5 text-[11px] text-muted-foreground shadow-subtle backdrop-blur-md border border-white/[0.04]">
+          <span>Drag desk · Click to edit · Hold <span className="text-foreground/85">Alt</span> to pan · <span className="text-foreground/85">Ctrl + Wheel</span> to zoom</span>
+        </div>
+        <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-card/90 px-1.5 py-1 shadow-subtle backdrop-blur-md border border-white/[0.04]">
+          <button
+            type="button"
+            className="h-8 w-8 rounded-full text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+            onClick={() => zoomBy(-0.12)}
+            aria-label="Zoom out"
+          >
+            −
+          </button>
+          <div className="min-w-[56px] text-center text-[11px] text-muted-foreground tabular-nums">
+            {Math.round(scale * 100)}%
+          </div>
+          <button
+            type="button"
+            className="h-8 w-8 rounded-full text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+            onClick={() => zoomBy(0.12)}
+            aria-label="Zoom in"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            className="ml-1 h-8 rounded-full px-2 text-[11px] text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+            onClick={resetView}
+          >
+            Reset
+          </button>
         </div>
       </div>
     </div>
