@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { addDays } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -30,6 +30,7 @@ export default function DashboardPage() {
   const [editingDesk, setEditingDesk] = useState<Desk | null>(null);
   const [deskEditorOpen, setDeskEditorOpen] = useState(false);
   const [mapSettingsOpen, setMapSettingsOpen] = useState(false);
+  const [draftDesks, setDraftDesks] = useState<Desk[] | null>(null);
 
   const availabilityQuery = useQuery({
     queryKey: ["availability", selectedDate.toDateString()],
@@ -60,6 +61,16 @@ export default function DashboardPage() {
     },
     enabled: isAdmin && editMode
   });
+
+  const hasLayoutChanges = useMemo(() => {
+    if (!draftDesks || !desksQuery.data) return false;
+    if (draftDesks.length !== desksQuery.data.length) return true;
+    const byId = new Map(draftDesks.map((d) => [d.id, d]));
+    return desksQuery.data.some((d) => {
+      const draft = byId.get(d.id);
+      return !draft || draft.position_x !== d.position_x || draft.position_y !== d.position_y || draft.name !== d.name || draft.room !== d.room;
+    });
+  }, [draftDesks, desksQuery.data]);
 
   const updateDeskPositionMutation = useMutation({
     mutationFn: async (desk: Desk & { position_x: number; position_y: number }) => {
@@ -117,7 +128,10 @@ export default function DashboardPage() {
   });
 
   const handlePositionChange = (desk: Desk, position_x: number, position_y: number) => {
-    updateDeskPositionMutation.mutate({ ...desk, position_x, position_y });
+    setDraftDesks((prev) => {
+      const base = prev ?? desksQuery.data ?? [];
+      return base.map((d) => (d.id === desk.id ? { ...d, position_x, position_y } : d));
+    });
   };
 
   const handleDeskClickEdit = (desk: Desk) => {
@@ -140,6 +154,35 @@ export default function DashboardPage() {
     })) ?? [];
 
   const freeDesks = availabilityQuery.data?.filter((d) => d.status === "available") ?? [];
+
+  const currentDesksForEditor = draftDesks ?? desksQuery.data ?? [];
+
+  const handleEnterEditMode = () => {
+    setEditMode(true);
+    if (desksQuery.data) {
+      setDraftDesks(desksQuery.data);
+    }
+  };
+
+  const handleExitEditMode = () => {
+    setEditMode(false);
+    setDraftDesks(null);
+  };
+
+  const handleSaveLayout = () => {
+    if (!draftDesks || !desksQuery.data) return;
+    const originalById = new Map(desksQuery.data.map((d) => [d.id, d]));
+    draftDesks.forEach((desk) => {
+      const orig = originalById.get(desk.id);
+      if (!orig) return;
+      if (orig.position_x === desk.position_x && orig.position_y === desk.position_y) return;
+      updateDeskPositionMutation.mutate({
+        ...desk,
+        position_x: desk.position_x,
+        position_y: desk.position_y
+      });
+    });
+  };
 
   return (
     <MainLayout>
@@ -177,15 +220,36 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 {isAdmin && (
                   <>
-                    <Button
-                      variant={editMode ? "default" : "secondary"}
-                      size="sm"
-                      onClick={() => setEditMode((e) => !e)}
-                    >
-                      {editMode ? "Done editing" : "Enable edit"}
-                    </Button>
+                    {!editMode && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleEnterEditMode}
+                      >
+                        Enable edit
+                      </Button>
+                    )}
                     {editMode && (
                       <>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={handleSaveLayout}
+                          disabled={!hasLayoutChanges || updateDeskPositionMutation.isPending}
+                        >
+                          {updateDeskPositionMutation.isPending
+                            ? "Saving…"
+                            : hasLayoutChanges
+                            ? "Save layout"
+                            : "Layout saved"}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleExitEditMode}
+                        >
+                          Exit edit
+                        </Button>
                         <Button
                           variant="secondary"
                           size="sm"
@@ -233,13 +297,13 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="flex flex-col">
-              <div className="w-full aspect-[16/10] min-h-[320px] overflow-hidden">
+              <div className="w-full aspect-[16/9] min-h-[420px] overflow-hidden">
                 {editMode ? (
                   <>
                     {desksQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
-                    {desksQuery.data && (
+                    {currentDesksForEditor.length > 0 && (
                       <EditableDeskMap
-                        desks={desksQuery.data}
+                        desks={currentDesksForEditor}
                         snapToGrid={snapToGrid}
                         onPositionChange={handlePositionChange}
                         onDeskClick={handleDeskClickEdit}
@@ -251,7 +315,7 @@ export default function DashboardPage() {
                 ) : (
                   <>
                     {availabilityQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
-                    {availabilityQuery.data && (
+                    {availabilityQuery.data && availabilityQuery.data.length > 0 && (
                       <DeskMap
                         desks={availabilityQuery.data}
                         onSelectDesk={handleDeskClick}
