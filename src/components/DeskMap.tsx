@@ -49,6 +49,13 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
               ? `${desk.booked_by_name} (${desk.booked_by_email})`
               : desk.booked_by_name ?? desk.booked_by_email ?? null;
 
+          const tooltipTone =
+            desk.status === "occupied"
+              ? "border-rose-500/25 bg-rose-500/10"
+              : desk.status === "mine"
+              ? "border-amber-500/25 bg-amber-500/10"
+              : "border-white/[0.08] bg-card/95";
+
           return (
             <div
               key={desk.id}
@@ -67,11 +74,28 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                 {desk.name}
                 {(desk.status !== "available") && (bookedBy || bookedRange) && (
                   <div className="pointer-events-none absolute left-1/2 top-[-10px] z-20 w-[260px] -translate-x-1/2 -translate-y-full opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                    <div className="rounded-xl border border-white/[0.08] bg-card/95 px-3 py-2 text-left text-[11px] text-muted-foreground shadow-glass backdrop-blur-xl">
-                      <div className="font-medium text-foreground">{desk.name} · {desk.room}</div>
-                      {bookedBy && <div className="mt-0.5">Booked by: <span className="text-foreground/90">{bookedBy}</span></div>}
-                      {bookedRange && <div className="mt-0.5">When: <span className="text-foreground/90">{bookedRange}</span></div>}
-                      {!bookedBy && !bookedRange && <div className="mt-0.5">Reserved</div>}
+                    <div className={`rounded-xl border ${tooltipTone} px-3 py-2 text-left text-[11px] text-muted-foreground shadow-glass backdrop-blur-xl`}>
+                      <div className="font-medium text-foreground">
+                        {desk.status === "occupied" ? "Occupied" : desk.status === "mine" ? "My booking" : "Reserved"} · {desk.name} · {desk.room}
+                      </div>
+
+                      {desk.status === "occupied" && bookedBy && (
+                        <div className="mt-0.5 text-rose-200/95">
+                          Occupied by: <span className="text-rose-50">{bookedBy}</span>
+                        </div>
+                      )}
+
+                      {desk.status === "mine" && bookedBy && (
+                        <div className="mt-0.5 text-amber-200/95">
+                          Booked by you: <span className="text-amber-50">{bookedBy}</span>
+                        </div>
+                      )}
+
+                      {bookedRange && (
+                        <div className="mt-0.5">
+                          From–to: <span className="text-foreground/90">{bookedRange}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
