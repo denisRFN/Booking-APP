@@ -67,7 +67,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             )}
           </div>
         </header>
-        <main className="flex-1 pb-4">{children}</main>
+        <main className="flex-1 min-h-0 overflow-y-auto pb-4 max-h-[calc(100vh-10rem)]">{children}</main>
         <footer className="mt-4 text-center text-xs text-muted-foreground">
           DeskFlow · Modern desk booking for hybrid teams
         </footer>

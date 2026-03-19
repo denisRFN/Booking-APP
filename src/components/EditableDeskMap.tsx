@@ -3,8 +3,8 @@ import { Rnd } from "react-rnd";
 import { cn } from "../lib/utils";
 import type { Desk } from "../types/api";
 
-const DESK_W = 64;
-const DESK_H = 64;
+const DESK_W = 120;
+const DESK_H = 56;
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
 const GRID_STEP = 5; // 0-100 in steps of 5 => 20x20 grid
@@ -201,7 +201,7 @@ export function EditableDeskMap({
                 }}
                 enableResizing={false}
                 className={cn(
-                  "flex items-center justify-center rounded-lg text-[11px] font-semibold shadow-lg shadow-black/40 cursor-grab active:cursor-grabbing transition-shadow duration-150",
+                  "flex items-center justify-center rounded-lg text-sm font-semibold shadow-lg shadow-black/40 cursor-grab active:cursor-grabbing transition-shadow duration-150",
                   "bg-primary/90 text-primary-foreground hover:shadow-glow",
                   selectedDeskId === desk.id && "ring-2 ring-primary ring-offset-2 ring-offset-background"
                 )}
