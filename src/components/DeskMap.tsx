@@ -9,7 +9,7 @@ interface DeskMapProps {
 }
 
 export function DeskMap({ desks, onSelectDesk, backgroundImageUrl }: DeskMapProps) {
-  const clampPct = (v: number) => Math.max(8, Math.min(92, v));
+  const clampPct = (v: number) => Math.max(3, Math.min(97, v));
   const fmtRange = (from?: string | null, to?: string | null) => {
     if (!from || !to) return null;
     const a = new Date(from);

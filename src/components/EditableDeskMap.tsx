@@ -7,7 +7,7 @@ const DESK_W = 120;
 const DESK_H = 56;
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
-const GRID_STEP = 5; // 0-100 in steps of 5 => 20x20 grid
+const GRID_STEP = 2; // finer grid so desks can be closer together
 
 function snapToGrid(value: number, step: number): number {
   return Math.round(value / step) * step;
@@ -64,6 +64,7 @@ export function EditableDeskMap({
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
+  const [draggingDeskId, setDraggingDeskId] = useState<number | null>(null);
 
   useEffect(() => {
     const el = mapRef.current;
@@ -164,8 +165,8 @@ export function EditableDeskMap({
               cx = snapToGrid(cx, GRID_STEP);
               cy = snapToGrid(cy, GRID_STEP);
             }
-            cx = clamp(cx, 5, 95);
-            cy = clamp(cy, 5, 95);
+            cx = clamp(cx, 3, 97);
+            cy = clamp(cy, 3, 97);
 
             const x = (cx / 100) * w - DESK_W / 2;
             const y = (cy / 100) * h - DESK_H / 2;
@@ -177,6 +178,9 @@ export function EditableDeskMap({
                 bounds="parent"
                 position={{ x: clamp(x, 0, w - DESK_W), y: clamp(y, 0, h - DESK_H) }}
                 scale={scale}
+                onDragStart={() => {
+                  setDraggingDeskId(desk.id);
+                }}
                 onDragStop={(_, d) => {
                   const w2 = size.w;
                   const h2 = size.h;
@@ -187,17 +191,18 @@ export function EditableDeskMap({
                   if (snapEnabled) {
                     newX = snapToGrid(newX, GRID_STEP);
                     newY = snapToGrid(newY, GRID_STEP);
-                    newX = clamp(newX, 5, 95);
-                    newY = clamp(newY, 5, 95);
+                    newX = clamp(newX, 3, 97);
+                    newY = clamp(newY, 3, 97);
                     const cells = usedCells(desk.id);
                     const { x: fx, y: fy } = findNearestFreeCell(newX, newY, cells, GRID_STEP);
                     newX = fx;
                     newY = fy;
                   } else {
-                    newX = Math.round(clamp(newX, 5, 95));
-                    newY = Math.round(clamp(newY, 5, 95));
+                    newX = Math.round(clamp(newX, 3, 97));
+                    newY = Math.round(clamp(newY, 3, 97));
                   }
                   onPositionChange(desk, newX, newY);
+                  setDraggingDeskId(null);
                 }}
                 enableResizing={false}
                 className={cn(
@@ -207,6 +212,8 @@ export function EditableDeskMap({
                 )}
                 onClick={(e) => {
                   e.stopPropagation();
+                  // Avoid opening the edit popup immediately after a drag
+                  if (draggingDeskId === desk.id) return;
                   onDeskClick?.(desk);
                 }}
               >
