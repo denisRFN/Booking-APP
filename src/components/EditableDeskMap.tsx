@@ -64,7 +64,6 @@ export function EditableDeskMap({
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const panStartRef = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
-  const [draggingDeskId, setDraggingDeskId] = useState<number | null>(null);
 
   useEffect(() => {
     const el = mapRef.current;
@@ -178,9 +177,6 @@ export function EditableDeskMap({
                 bounds="parent"
                 position={{ x: clamp(x, 0, w - DESK_W), y: clamp(y, 0, h - DESK_H) }}
                 scale={scale}
-                onDragStart={() => {
-                  setDraggingDeskId(desk.id);
-                }}
                 onDragStop={(_, d) => {
                   const w2 = size.w;
                   const h2 = size.h;
@@ -202,7 +198,6 @@ export function EditableDeskMap({
                     newY = Math.round(clamp(newY, 3, 97));
                   }
                   onPositionChange(desk, newX, newY);
-                  setDraggingDeskId(null);
                 }}
                 enableResizing={false}
                 className={cn(
@@ -210,10 +205,8 @@ export function EditableDeskMap({
                   "bg-primary/90 text-primary-foreground hover:shadow-glow",
                   selectedDeskId === desk.id && "ring-2 ring-primary ring-offset-2 ring-offset-background"
                 )}
-                onClick={(e) => {
+                onDoubleClick={(e) => {
                   e.stopPropagation();
-                  // Avoid opening the edit popup immediately after a drag
-                  if (draggingDeskId === desk.id) return;
                   onDeskClick?.(desk);
                 }}
               >
