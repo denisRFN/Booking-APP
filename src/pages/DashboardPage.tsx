@@ -70,7 +70,14 @@ export default function DashboardPage() {
     const byId = new Map(draftDesks.map((d) => [d.id, d]));
     return desksQuery.data.some((d) => {
       const draft = byId.get(d.id);
-      return !draft || draft.position_x !== d.position_x || draft.position_y !== d.position_y || draft.name !== d.name || draft.room !== d.room;
+      return (
+        !draft ||
+        draft.position_x !== d.position_x ||
+        draft.position_y !== d.position_y ||
+        draft.name !== d.name ||
+        draft.room !== d.room ||
+        (draft.rotation_deg ?? 0) !== (d.rotation_deg ?? 0)
+      );
     });
   }, [draftDesks, desksQuery.data]);
 
@@ -84,17 +91,6 @@ export default function DashboardPage() {
         payload.rotation_deg = desk.rotation_deg;
       }
       await apiClient.put(`/desks/${desk.id}`, payload);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["desks"] });
-      queryClient.invalidateQueries({ queryKey: ["availability"] });
-    }
-  });
-
-  const updateDeskRotationMutation = useMutation({
-    mutationFn: async ({ deskId, rotation_deg }: { deskId: number; rotation_deg: number }) => {
-      // Admin-only mutation via JWT interceptor.
-      await apiClient.put(`/desks/${deskId}`, { rotation_deg });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["desks"] });
@@ -127,6 +123,20 @@ export default function DashboardPage() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["desks"] });
       queryClient.invalidateQueries({ queryKey: ["availability"] });
+      // If we're currently in edit mode, also add the new desk to the draft
+      // so its rotation (and UI placement) appear immediately.
+      setDraftDesks((prev) => {
+        if (!prev) return prev;
+        if (prev.some((d) => d.id === data.id)) return prev;
+        return [
+          ...prev,
+          {
+            ...data,
+            rotation_deg: typeof data.rotation_deg === "number" ? data.rotation_deg : getRotation(data.id)
+          }
+        ];
+      });
+
       setEditingDesk(data);
       setDeskEditorOpen(true);
     }
@@ -136,9 +146,13 @@ export default function DashboardPage() {
     mutationFn: async (id: number) => {
       await apiClient.delete(`/desks/${id}`);
     },
-    onSuccess: () => {
+    onSuccess: (_, deskId) => {
       queryClient.invalidateQueries({ queryKey: ["desks"] });
       queryClient.invalidateQueries({ queryKey: ["availability"] });
+      setDraftDesks((prev) => {
+        if (!prev) return prev;
+        return prev.filter((d) => d.id !== deskId);
+      });
       setEditingDesk(null);
       setDeskEditorOpen(false);
     }
@@ -183,11 +197,6 @@ export default function DashboardPage() {
     return `${startLabel} – ${endLabel}`;
   }, [selectedDate]);
 
-  const backendSupportsDeskRotation = useMemo(() => {
-    const first = desksQuery.data?.[0] as (Desk & { rotation_deg?: number }) | undefined;
-    return typeof first?.rotation_deg !== "undefined";
-  }, [desksQuery.data]);
-
   const rotationByIdAvailability = useMemo(() => {
     const m = new Map<number, number>();
     (availabilityQuery.data ?? []).forEach((d) => {
@@ -210,10 +219,26 @@ export default function DashboardPage() {
   const getRotationDegEditor = (deskId: number) =>
     rotationByIdEditor.get(deskId) ?? getRotation(deskId);
 
+  const rotationByIdDraft = useMemo(() => {
+    const m = new Map<number, number>();
+    (draftDesks ?? []).forEach((d) => {
+      const v = typeof d.rotation_deg === "number" ? d.rotation_deg : getRotation(d.id);
+      m.set(d.id, v);
+    });
+    return m;
+  }, [draftDesks, getRotation]);
+
+  const getRotationDegDraft = (deskId: number) => rotationByIdDraft.get(deskId) ?? 0;
+
   const handleEnterEditMode = () => {
     setEditMode(true);
     if (desksQuery.data) {
-      setDraftDesks(desksQuery.data);
+      setDraftDesks(
+        desksQuery.data.map((d) => ({
+          ...d,
+          rotation_deg: typeof d.rotation_deg === "number" ? d.rotation_deg : getRotation(d.id)
+        }))
+      );
     }
   };
 
@@ -228,12 +253,14 @@ export default function DashboardPage() {
     draftDesks.forEach((desk) => {
       const orig = originalById.get(desk.id);
       if (!orig) return;
-      if (orig.position_x === desk.position_x && orig.position_y === desk.position_y) return;
+      const positionSame = orig.position_x === desk.position_x && orig.position_y === desk.position_y;
+      const rotationSame = (orig.rotation_deg ?? 0) === (desk.rotation_deg ?? 0);
+      if (positionSame && rotationSame) return;
       updateDeskPositionMutation.mutate({
         ...desk,
         position_x: desk.position_x,
         position_y: desk.position_y,
-        ...(backendSupportsDeskRotation ? { rotation_deg: getRotation(desk.id) } : {})
+        rotation_deg: desk.rotation_deg ?? 0
       });
     });
   };
@@ -344,7 +371,7 @@ export default function DashboardPage() {
                         onDeskClick={handleDeskClickEdit}
                         selectedDeskId={editingDesk?.id ?? null}
                         backgroundImageUrl={officeMapImageUrl}
-                        getRotationDeg={getRotationDegEditor}
+                        getRotationDeg={getRotationDegDraft}
                       />
                     )}
                   </>
@@ -469,11 +496,13 @@ export default function DashboardPage() {
         desk={editingDesk}
         onSave={(desk, name, room) => updateDeskDetailsMutation.mutate({ desk, name, room })}
         onDelete={(desk) => deleteDeskMutation.mutate(desk.id)}
-        rotationDeg={editingDesk ? getRotation(editingDesk.id) : 0}
+        rotationDeg={editingDesk ? getRotationDegDraft(editingDesk.id) : 0}
         onRotate={(desk, rotationDeg) => {
-          // Update UI immediately (local) and persist in backend (cloud).
-          setRotation(desk.id, rotationDeg);
-          updateDeskRotationMutation.mutate({ deskId: desk.id, rotation_deg: rotationDeg });
+          // Update draft only; persist in backend when pressing "Save layout".
+          setDraftDesks((prev) => {
+            if (!prev) return prev;
+            return prev.map((d) => (d.id === desk.id ? { ...d, rotation_deg: rotationDeg } : d));
+          });
         }}
         isSaving={updateDeskDetailsMutation.isPending}
         isDeleting={deleteDeskMutation.isPending}
