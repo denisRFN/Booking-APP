@@ -332,7 +332,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="flex flex-col">
-              <div className="w-full aspect-[2/3] min-h-[1200px] overflow-hidden">
+              <div className="w-full aspect-[3/5] min-h-[1580px] overflow-hidden">
                 {editMode ? (
                   <>
                     {desksQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
