@@ -268,8 +268,8 @@ export default function DashboardPage() {
   return (
     <MainLayout>
       <div className="flex flex-col gap-6">
-        {/* Office map + right column (calendar, lists) */}
-        <div className="grid gap-6 lg:grid-cols-[2.4fr_1.4fr] items-start">
+        {/* Office map + right columns (calendar + lists) */}
+        <div className="grid gap-6 lg:grid-cols-[580px_1fr_1.15fr] items-start">
           <div className="space-y-4 min-w-0">
             <Card className="opacity-0 animate-stagger-1">
             <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
@@ -392,28 +392,8 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+          {/* Middle column: lists */}
           <div className="space-y-4 min-w-0 flex flex-col">
-            {/* Calendar top-right */}
-            <Card className="opacity-0 animate-stagger-1 rounded-2xl border border-white/[0.06] bg-card/80 backdrop-blur-md shadow-glass">
-              <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
-                <div>
-                  <CardTitle className="font-display font-bold text-sm">Current week</CardTitle>
-                  <CardDescription>
-                    {weekRangeLabel} · Your reservations
-                  </CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="w-full h-[300px] rounded-2xl overflow-hidden border border-white/[0.08] bg-gradient-to-br from-card/90 to-secondary/80 shadow-glow ring-1 ring-primary/10">
-                  <CalendarView
-                    events={events}
-                    defaultDate={selectedDate}
-                    onNavigate={(d) => setSelectedDate(d)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Find free desk */}
             <Card className="opacity-0 animate-stagger-2 rounded-2xl border border-white/[0.06] bg-card/80 backdrop-blur-md shadow-glass">
               <CardHeader>
@@ -462,7 +442,10 @@ export default function DashboardPage() {
                   )}
                   {!reservationsQuery.isLoading &&
                     (reservationsQuery.data?.slice(0, 5).map((r) => (
-                      <div key={r.id} className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.04] bg-secondary/50 px-3 py-2">
+                      <div
+                        key={r.id}
+                        className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.04] bg-secondary/50 px-3 py-2"
+                      >
                         <div className="min-w-0">
                           <div className="truncate font-medium">{r.desk_name} · {r.room}</div>
                           <div className="text-xs text-muted-foreground">
@@ -474,6 +457,29 @@ export default function DashboardPage() {
                   {!reservationsQuery.isLoading && !reservationsQuery.data?.length && (
                     <div className="text-xs text-muted-foreground">No reservations yet.</div>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right column: calendar */}
+          <div className="space-y-4 min-w-0 flex flex-col">
+            <Card className="opacity-0 animate-stagger-1 rounded-2xl border border-white/[0.06] bg-card/80 backdrop-blur-md shadow-glass">
+              <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+                <div>
+                  <CardTitle className="font-display font-bold text-sm">Current week</CardTitle>
+                  <CardDescription>
+                    {weekRangeLabel} · Your reservations
+                  </CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full h-[300px] rounded-2xl overflow-hidden border border-white/[0.08] bg-gradient-to-br from-card/90 to-secondary/80 shadow-glow ring-1 ring-primary/10">
+                  <CalendarView
+                    events={events}
+                    defaultDate={selectedDate}
+                    onNavigate={(d) => setSelectedDate(d)}
+                  />
                 </div>
               </CardContent>
             </Card>
