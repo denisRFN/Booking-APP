@@ -26,7 +26,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
             <img
               src={backgroundImageUrl}
               alt="Office map"
-              className="absolute inset-0 h-full w-full object-cover opacity-70"
+              className="absolute inset-0 h-full w-full object-contain object-center opacity-70"
               draggable={false}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-black/35" />
