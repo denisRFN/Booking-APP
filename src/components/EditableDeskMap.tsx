@@ -156,7 +156,7 @@ export function EditableDeskMap({
                 <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-black/35" />
               </>
             ) : null}
-          {desks.map((desk) => {
+              {desks.map((desk) => {
             const w = size.w;
             const h = size.h;
 
@@ -171,6 +171,13 @@ export function EditableDeskMap({
 
             const x = (cx / 100) * w - DESK_W / 2;
             const y = (cy / 100) * h - DESK_H / 2;
+
+            const deg =
+              typeof desk.rotation_deg === "number"
+                ? desk.rotation_deg
+                : getRotationDeg
+                ? getRotationDeg(desk.id)
+                : 0;
 
             return (
               <Rnd
@@ -216,7 +223,7 @@ export function EditableDeskMap({
                     "bg-primary/90 text-primary-foreground hover:shadow-glow",
                     selectedDeskId === desk.id && "ring-2 ring-primary ring-offset-2 ring-offset-background"
                   )}
-                  style={getRotationDeg ? { transform: `rotate(${getRotationDeg(desk.id)}deg)` } : undefined}
+                  style={deg ? { transform: `rotate(${deg}deg)` } : undefined}
                 >
                   {desk.name}
                 </div>
