@@ -220,7 +220,7 @@ export function EditableDeskMap({
                 <div
                   className={cn(
                     "flex h-full w-full items-center justify-center rounded-lg text-sm font-semibold shadow-md shadow-black/25",
-                    "bg-primary/16 border border-primary/30 text-primary-foreground hover:bg-primary/22 hover:shadow-glow",
+                    "bg-primary/35 border border-primary/55 text-primary-foreground hover:bg-primary/45 hover:shadow-glow",
                     selectedDeskId === desk.id && "ring-2 ring-primary ring-offset-2 ring-offset-background"
                   )}
                   style={deg ? { transform: `rotate(${deg}deg)` } : undefined}

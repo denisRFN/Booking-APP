@@ -38,10 +38,10 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
           const top = clampPct(desk.position_y);
           const colorClasses =
             desk.status === "available"
-              ? "bg-primary/16 hover:bg-primary/22 border border-primary/30 text-primary-foreground shadow-[0_0_24px_-10px_rgba(251,191,36,0.25)]"
+              ? "bg-primary/40 hover:bg-primary/50 border border-primary/55 text-primary-foreground shadow-[0_0_26px_-10px_rgba(251,191,36,0.35)]"
               : desk.status === "mine"
-              ? "bg-primary/12 hover:bg-primary/18 border border-primary/25 text-primary-foreground shadow-[0_0_24px_-10px_rgba(251,191,36,0.18)]"
-              : "bg-destructive/14 hover:bg-destructive/18 border border-destructive/30 text-primary-foreground shadow-[0_0_24px_-10px_rgba(244,63,94,0.18)]";
+              ? "bg-indigo-500/25 hover:bg-indigo-500/35 border border-indigo-300/35 text-primary-foreground shadow-[0_0_24px_-10px_rgba(99,102,241,0.28)]"
+              : "bg-destructive/28 hover:bg-destructive/38 border border-destructive/40 text-primary-foreground shadow-[0_0_24px_-10px_rgba(244,63,94,0.28)]";
 
           const bookedRange = fmtRange(desk.booked_from, desk.booked_to);
           const bookedBy =
@@ -53,7 +53,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
             desk.status === "occupied"
               ? "border-destructive/25 bg-destructive/10"
               : desk.status === "mine"
-              ? "border-primary/25 bg-primary/10"
+              ? "border-indigo-300/25 bg-indigo-500/10"
               : "border-white/[0.08] bg-card/95";
 
           const deg =
@@ -97,8 +97,8 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                       )}
 
                       {desk.status === "mine" && bookedBy && (
-                        <div className="mt-0.5 text-primary/90">
-                          Booked by you: <span className="text-primary/95">{bookedBy}</span>
+                        <div className="mt-0.5 text-indigo-200/90">
+                          Booked by you: <span className="text-indigo-100/95">{bookedBy}</span>
                         </div>
                       )}
 
@@ -116,9 +116,9 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
           );
         })}
         <div className="absolute bottom-3 left-3 flex gap-2 rounded-full bg-card/90 px-3 py-1.5 text-[11px] text-muted-foreground shadow-subtle backdrop-blur-md border border-white/[0.04]">
-          <LegendDot className="bg-primary/60" label="Available" />
-          <LegendDot className="bg-destructive/60" label="Occupied" />
-          <LegendDot className="bg-primary/55" label="My booking" />
+          <LegendDot className="bg-primary/55" label="Available" />
+          <LegendDot className="bg-destructive/55" label="Occupied" />
+          <LegendDot className="bg-indigo-500/45" label="My booking" />
         </div>
       </div>
     </div>
