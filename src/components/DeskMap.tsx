@@ -38,10 +38,10 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
           const top = clampPct(desk.position_y);
           const colorClasses =
             desk.status === "available"
-              ? "bg-primary/90 hover:bg-primary text-background"
+              ? "bg-primary/16 hover:bg-primary/22 border border-primary/30 text-primary-foreground shadow-[0_0_24px_-10px_rgba(251,191,36,0.25)]"
               : desk.status === "mine"
-              ? "bg-amber-400/90 hover:bg-amber-300/90 text-background"
-              : "bg-rose-500/90 hover:bg-rose-400/90 text-background";
+              ? "bg-primary/12 hover:bg-primary/18 border border-primary/25 text-primary-foreground shadow-[0_0_24px_-10px_rgba(251,191,36,0.18)]"
+              : "bg-destructive/14 hover:bg-destructive/18 border border-destructive/30 text-primary-foreground shadow-[0_0_24px_-10px_rgba(244,63,94,0.18)]";
 
           const bookedRange = fmtRange(desk.booked_from, desk.booked_to);
           const bookedBy =
@@ -51,9 +51,9 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
 
           const tooltipTone =
             desk.status === "occupied"
-              ? "border-rose-500/25 bg-rose-500/10"
+              ? "border-destructive/25 bg-destructive/10"
               : desk.status === "mine"
-              ? "border-amber-500/25 bg-amber-500/10"
+              ? "border-primary/25 bg-primary/10"
               : "border-white/[0.08] bg-card/95";
 
           const deg =
@@ -78,7 +78,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                   type="button"
                   onClick={() => onSelectDesk(desk)}
                   className={cn(
-                    "group relative flex h-12 min-w-[6.5rem] px-3 items-center justify-center rounded-lg text-sm font-semibold shadow-lg shadow-black/40 transition-all duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    "group relative flex h-12 min-w-[6.5rem] px-3 items-center justify-center rounded-lg text-sm font-semibold shadow-md shadow-black/25 transition-all duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                     colorClasses
                   )}
                 >
@@ -91,14 +91,14 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                       </div>
 
                       {desk.status === "occupied" && bookedBy && (
-                        <div className="mt-0.5 text-rose-200/95">
-                          Occupied by: <span className="text-rose-50">{bookedBy}</span>
+                        <div className="mt-0.5 text-destructive/90">
+                          Occupied by: <span className="text-destructive/95">{bookedBy}</span>
                         </div>
                       )}
 
                       {desk.status === "mine" && bookedBy && (
-                        <div className="mt-0.5 text-amber-200/95">
-                          Booked by you: <span className="text-amber-50">{bookedBy}</span>
+                        <div className="mt-0.5 text-primary/90">
+                          Booked by you: <span className="text-primary/95">{bookedBy}</span>
                         </div>
                       )}
 
@@ -116,9 +116,9 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
           );
         })}
         <div className="absolute bottom-3 left-3 flex gap-2 rounded-full bg-card/90 px-3 py-1.5 text-[11px] text-muted-foreground shadow-subtle backdrop-blur-md border border-white/[0.04]">
-          <LegendDot className="bg-primary" label="Available" />
-          <LegendDot className="bg-rose-400" label="Occupied" />
-          <LegendDot className="bg-amber-300" label="My booking" />
+          <LegendDot className="bg-primary/60" label="Available" />
+          <LegendDot className="bg-destructive/60" label="Occupied" />
+          <LegendDot className="bg-primary/55" label="My booking" />
         </div>
       </div>
     </div>
