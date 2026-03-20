@@ -65,7 +65,7 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
           </button>
         </div>
         <div className="text-[11px] text-muted-foreground">
-          Week view
+          Day view
         </div>
       </div>
 
@@ -73,8 +73,8 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
         <Calendar
           localizer={localizer}
           events={rbcEvents}
-          defaultView="week"
-          views={["week"]}
+          defaultView="day"
+          views={["day"]}
           date={defaultDate}
           onView={onViewChange}
           style={{ height: "100%" }}
