@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { addDays, format } from "date-fns";
+import { addDays, startOfWeek, endOfWeek, format } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { MainLayout } from "../layouts/MainLayout";
@@ -188,7 +188,14 @@ export default function DashboardPage() {
 
   const currentDesksForEditor = draftDesks ?? desksQuery.data ?? [];
 
-  const dayLabel = useMemo(() => format(selectedDate, "dd MMM yyyy"), [selectedDate]);
+  const weekRangeLabel = useMemo(() => {
+    const start = startOfWeek(selectedDate, { weekStartsOn: 1 });
+    const end = endOfWeek(selectedDate, { weekStartsOn: 1 });
+    const sameMonth = start.getMonth() === end.getMonth();
+    const startLabel = format(start, "dd MMM");
+    const endLabel = format(end, sameMonth ? "dd" : "dd MMM");
+    return `${startLabel} – ${endLabel}`;
+  }, [selectedDate]);
 
   const rotationByIdAvailability = useMemo(() => {
     const m = new Map<number, number>();
@@ -390,9 +397,9 @@ export default function DashboardPage() {
             <Card className="opacity-0 animate-stagger-1 rounded-2xl border border-white/[0.06] bg-card/80 backdrop-blur-md shadow-glass">
               <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
                 <div>
-                  <CardTitle className="font-display font-bold text-sm">Current day</CardTitle>
+                  <CardTitle className="font-display font-bold text-sm">Current week</CardTitle>
                   <CardDescription>
-                    {dayLabel} · Your reservations
+                    {weekRangeLabel} · Your reservations
                   </CardDescription>
                 </div>
               </CardHeader>
