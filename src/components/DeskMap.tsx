@@ -56,26 +56,33 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
               ? "border-amber-500/25 bg-amber-500/10"
               : "border-white/[0.08] bg-card/95";
 
+          const deg =
+            typeof desk.rotation_deg === "number"
+              ? desk.rotation_deg
+              : getRotationDeg
+                ? getRotationDeg(desk.id)
+                : 0;
+
           return (
             <div
               key={desk.id}
               className="absolute -translate-x-1/2 -translate-y-1/2"
               style={{ left: `${left}%`, top: `${top}%` }}
             >
-              <button
-                type="button"
-                onClick={() => onSelectDesk(desk)}
-                className={cn(
-                  "group relative flex h-12 min-w-[6.5rem] px-3 items-center justify-center rounded-lg text-sm font-semibold shadow-lg shadow-black/40 transition-all duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                  colorClasses
-                )}
+              {/* Rotate wrapper (not the button) so Tailwind hover translate/scale still work on the desk chip */}
+              <div
+                className="flex items-center justify-center"
+                style={{ transform: deg ? `rotate(${deg}deg)` : undefined }}
               >
-                <div
-                  className="flex h-full w-full items-center justify-center"
-                  style={getRotationDeg ? { transform: `rotate(${getRotationDeg(desk.id)}deg)` } : undefined}
+                <button
+                  type="button"
+                  onClick={() => onSelectDesk(desk)}
+                  className={cn(
+                    "group relative flex h-12 min-w-[6.5rem] px-3 items-center justify-center rounded-lg text-sm font-semibold shadow-lg shadow-black/40 transition-all duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    colorClasses
+                  )}
                 >
                   {desk.name}
-                </div>
                 {(desk.status !== "available") && (bookedBy || bookedRange) && (
                   <div className="pointer-events-none absolute left-1/2 top-[-10px] z-20 w-[260px] -translate-x-1/2 -translate-y-full opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                     <div className={`rounded-xl border ${tooltipTone} px-3 py-2 text-left text-[11px] text-muted-foreground shadow-glass backdrop-blur-xl`}>
@@ -104,6 +111,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                   </div>
                 )}
               </button>
+              </div>
             </div>
           );
         })}
