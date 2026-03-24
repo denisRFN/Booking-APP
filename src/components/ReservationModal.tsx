@@ -183,6 +183,10 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
                 const isSelected = selectedDays.includes(key);
                 const statusLabel =
                   status === "available" ? "Available" : status === "mine" ? "Booked by you" : "Unavailable";
+                const occupiedBy =
+                  status === "occupied"
+                    ? dayDesk?.booked_by_name ?? dayDesk?.booked_by_email ?? "another user"
+                    : null;
 
                 return (
                   <button
@@ -202,6 +206,9 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
                     <div className="text-xs font-semibold">{format(d, "EEE")}</div>
                     <div className="text-[11px] text-muted-foreground">{format(d, "dd MMM")}</div>
                     <div className="mt-1 text-[11px]">{statusLabel}</div>
+                    {occupiedBy && (
+                      <div className="mt-0.5 truncate text-[10px] text-destructive/90">Occupied by: {occupiedBy}</div>
+                    )}
                   </button>
                 );
               })}
@@ -211,7 +218,13 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
                 <div className="font-medium text-destructive">
                   {focusedDeskStatus.status === "mine" ? "Booked by you" : "Unavailable"}
                 </div>
-                {focusedBookedBy && (
+                {focusedDeskStatus.status === "occupied" && (
+                  <div className="text-muted-foreground">
+                    Occupied by:{" "}
+                    <span className="text-foreground">{focusedBookedBy ?? "another user"}</span>
+                  </div>
+                )}
+                {focusedDeskStatus.status === "mine" && focusedBookedBy && (
                   <div className="text-muted-foreground">
                     Reserved by: <span className="text-foreground">{focusedBookedBy}</span>
                   </div>
