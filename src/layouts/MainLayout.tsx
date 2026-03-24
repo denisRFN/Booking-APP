@@ -1,7 +1,9 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Moon, Sun } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 import { logout } from "../services/auth";
 import { cn } from "../lib/utils";
 
@@ -12,6 +14,7 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   const location = useLocation();
   const { user, setUser } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     logout();
@@ -36,7 +39,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-[hsl(30,14%,9%)] to-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/70 to-background">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6">
         <header className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-white/[0.06] bg-card/90 px-5 py-3.5 shadow-subtle backdrop-blur-xl">
           <div className="flex min-w-0 items-center gap-4">
@@ -53,7 +56,16 @@ export function MainLayout({ children }: MainLayoutProps) {
               {user.role === "admin" && <NavLink to="/admin" label="Admin" />}
             </nav>
           )}
-          <div className="flex shrink-0 items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             {user && (
               <>
                 <div className="hidden text-right text-xs sm:block">

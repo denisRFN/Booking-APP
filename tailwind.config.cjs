@@ -13,34 +13,34 @@ module.exports = {
         sans: ["DM Sans", "system-ui", "sans-serif"]
       },
       colors: {
-        border: "hsl(25 15% 18%)",
-        input: "hsl(25 12% 14%)",
-        ring: "hsl(32 95% 55%)",
-        background: "hsl(30 12% 7%)",
-        foreground: "hsl(40 15% 96%)",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "hsl(32 95% 55%)",
-          foreground: "hsl(30 12% 7%)"
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))"
         },
         secondary: {
-          DEFAULT: "hsl(28 14% 14%)",
-          foreground: "hsl(40 15% 96%)"
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))"
         },
         muted: {
-          DEFAULT: "hsl(28 12% 14%)",
-          foreground: "hsl(35 10% 58%)"
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))"
         },
         accent: {
-          DEFAULT: "hsl(32 90% 50%)",
-          foreground: "hsl(30 12% 7%)"
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))"
         },
         destructive: {
-          DEFAULT: "hsl(0 72% 52%)",
-          foreground: "hsl(40 15% 96%)"
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))"
         },
         card: {
-          DEFAULT: "hsla(28, 14%, 10%, 0.75)",
-          foreground: "hsl(40 15% 96%)"
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))"
         }
       },
       borderRadius: {

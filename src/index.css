@@ -2,6 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: 0 0% 99%;
+  --foreground: 224 20% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 20% 12%;
+  --primary: 32 95% 50%;
+  --primary-foreground: 30 12% 7%;
+  --secondary: 210 20% 96%;
+  --secondary-foreground: 224 20% 12%;
+  --muted: 210 18% 94%;
+  --muted-foreground: 220 11% 42%;
+  --accent: 32 90% 50%;
+  --accent-foreground: 30 12% 7%;
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 210 16% 86%;
+  --input: 210 16% 90%;
+  --ring: 32 95% 52%;
+}
+
+.dark {
+  --background: 30 12% 7%;
+  --foreground: 40 15% 96%;
+  --card: 28 14% 10%;
+  --card-foreground: 40 15% 96%;
+  --primary: 32 95% 55%;
+  --primary-foreground: 30 12% 7%;
+  --secondary: 28 14% 14%;
+  --secondary-foreground: 40 15% 96%;
+  --muted: 28 12% 14%;
+  --muted-foreground: 35 10% 58%;
+  --accent: 32 90% 50%;
+  --accent-foreground: 30 12% 7%;
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 40 15% 96%;
+  --border: 25 15% 18%;
+  --input: 25 12% 14%;
+  --ring: 32 95% 55%;
+}
+
 html {
   font-family: "DM Sans", system-ui, sans-serif;
 }
@@ -50,6 +90,30 @@ body {
   --cal-primary: hsl(32 95% 55%);
   --cal-primary-dark: hsl(32 90% 45%);
   --cal-bg-slot: rgba(255, 255, 255, 0.02);
+  --cal-time-gutter-bg: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.15) 100%);
+  --cal-time-gutter-color: rgba(255, 255, 255, 0.5);
+  --cal-header-color: rgba(255, 255, 255, 0.85);
+  --cal-toolbar-button-color: rgba(255, 255, 255, 0.8);
+  --cal-toolbar-button-bg: rgba(255, 255, 255, 0.03);
+  --cal-toolbar-button-hover-bg: rgba(255, 255, 255, 0.06);
+  --cal-toolbar-button-hover-color: #fff;
+  --cal-surface-bg: rgba(0, 0, 0, 0.15);
+  --cal-slot-border: rgba(255, 255, 255, 0.04);
+  --cal-main-border: rgba(255, 255, 255, 0.08);
+}
+
+.light .calendar-theme {
+  --cal-bg-slot: rgba(0, 0, 0, 0.015);
+  --cal-time-gutter-bg: linear-gradient(180deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.02) 100%);
+  --cal-time-gutter-color: rgba(0, 0, 0, 0.55);
+  --cal-header-color: rgba(0, 0, 0, 0.78);
+  --cal-toolbar-button-color: rgba(0, 0, 0, 0.75);
+  --cal-toolbar-button-bg: rgba(0, 0, 0, 0.03);
+  --cal-toolbar-button-hover-bg: rgba(0, 0, 0, 0.06);
+  --cal-toolbar-button-hover-color: rgba(0, 0, 0, 0.9);
+  --cal-surface-bg: rgba(0, 0, 0, 0.02);
+  --cal-slot-border: rgba(0, 0, 0, 0.06);
+  --cal-main-border: rgba(0, 0, 0, 0.12);
 }
 
 .calendar-theme .rbc-event {
@@ -80,12 +144,12 @@ body {
 .calendar-theme .rbc-time-view,
 .calendar-theme .rbc-time-header,
 .calendar-theme .rbc-time-content {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: var(--cal-main-border);
 }
 
 .calendar-theme .rbc-time-slot,
 .calendar-theme .rbc-timeslot-group {
-  border-color: rgba(255, 255, 255, 0.04);
+  border-color: var(--cal-slot-border);
 }
 
 .calendar-theme .rbc-timeslot-group:nth-child(even) {
@@ -94,14 +158,14 @@ body {
 
 .calendar-theme .rbc-time-header-gutter,
 .calendar-theme .rbc-time-gutter {
-  background: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.15) 100%);
-  color: rgba(255, 255, 255, 0.5);
+  background: var(--cal-time-gutter-bg);
+  color: var(--cal-time-gutter-color);
   font-size: 0.7rem;
 }
 
 .calendar-theme .rbc-header {
-  border-color: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
+  border-color: var(--cal-main-border);
+  color: var(--cal-header-color);
   font-weight: 600;
   font-size: 0.8rem;
   padding: 0.5rem 0.25rem;
@@ -116,21 +180,21 @@ body {
 
 .calendar-theme .rbc-toolbar button {
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--cal-main-border);
   padding-inline: 1rem;
   padding-block: 0.4rem;
   font-size: 0.8rem;
   font-weight: 500;
   text-transform: none;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--cal-toolbar-button-color);
+  background: var(--cal-toolbar-button-bg);
   transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .calendar-theme .rbc-toolbar button:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--cal-toolbar-button-hover-bg);
+  border-color: var(--cal-main-border);
+  color: var(--cal-toolbar-button-hover-color);
 }
 
 .calendar-theme .rbc-toolbar .rbc-toolbar-label {
@@ -141,11 +205,11 @@ body {
 
 .calendar-theme .rbc-month-view,
 .calendar-theme .rbc-time-view {
-  background: rgba(0, 0, 0, 0.15);
+  background: var(--cal-surface-bg);
 }
 
 .calendar-theme .rbc-day-slot .rbc-time-slot {
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-top: 1px solid var(--cal-slot-border);
 }
 
 /* Square calendar container polish */
