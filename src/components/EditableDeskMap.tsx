@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Rnd } from "react-rnd";
 import { cn } from "../lib/utils";
 import type { Desk } from "../types/api";
+import { DeskTile } from "./DeskTile";
 
 const DESK_W = 120;
 const DESK_H = 56;
@@ -218,14 +219,10 @@ export function EditableDeskMap({
                 }}
               >
                 <div
-                  className={cn(
-                    "flex h-full w-full items-center justify-center rounded-lg text-sm font-semibold shadow-md shadow-black/25",
-                    "bg-primary/35 border border-primary/55 text-primary-foreground hover:bg-primary/45 hover:shadow-glow",
-                    selectedDeskId === desk.id && "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                  )}
+                  className={cn("flex h-full w-full items-center justify-center")}
                   style={deg ? { transform: `rotate(${deg}deg)` } : undefined}
                 >
-                  {desk.name}
+                  <DeskTile label={desk.name} tone="available" selected={selectedDeskId === desk.id} />
                 </div>
               </Rnd>
             );

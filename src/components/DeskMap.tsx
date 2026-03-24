@@ -1,6 +1,7 @@
 import { Button } from "./ui/button";
 import { cn } from "../lib/utils";
 import { AvailabilityDesk } from "../types/api";
+import { DeskTile } from "./DeskTile";
 
 interface DeskMapProps {
   desks: AvailabilityDesk[];
@@ -36,13 +37,6 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
           // position_x / position_y are stored as center coordinates (0-100)
           const left = clampPct(desk.position_x);
           const top = clampPct(desk.position_y);
-          const colorClasses =
-            desk.status === "available"
-              ? "bg-primary/40 hover:bg-primary/50 border border-primary/55 text-primary-foreground shadow-[0_0_26px_-10px_rgba(251,191,36,0.35)]"
-              : desk.status === "mine"
-              ? "bg-indigo-500/25 hover:bg-indigo-500/35 border border-indigo-300/35 text-primary-foreground shadow-[0_0_24px_-10px_rgba(99,102,241,0.28)]"
-              : "bg-destructive/28 hover:bg-destructive/38 border border-destructive/40 text-primary-foreground shadow-[0_0_24px_-10px_rgba(244,63,94,0.28)]";
-
           const bookedRange = fmtRange(desk.booked_from, desk.booked_to);
           const bookedBy =
             desk.booked_by_name && desk.booked_by_email
@@ -77,12 +71,18 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                 <button
                   type="button"
                   onClick={() => onSelectDesk(desk)}
-                  className={cn(
-                    "group relative flex h-12 min-w-[6.5rem] px-3 items-center justify-center rounded-lg text-sm font-semibold shadow-md shadow-black/25 transition-all duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                    colorClasses
-                  )}
+                  className="group relative flex h-[56px] w-[120px] items-center justify-center transition-transform duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  {desk.name}
+                  <DeskTile
+                    label={desk.name}
+                    tone={
+                      desk.status === "available"
+                        ? "available"
+                        : desk.status === "mine"
+                          ? "mine"
+                          : "occupied"
+                    }
+                  />
                 {(desk.status !== "available") && (bookedBy || bookedRange) && (
                   <div className="pointer-events-none absolute left-1/2 top-[-10px] z-20 w-[260px] -translate-x-1/2 -translate-y-full opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                     <div className={`rounded-xl border ${tooltipTone} px-3 py-2 text-left text-[11px] text-muted-foreground shadow-glass backdrop-blur-xl`}>
