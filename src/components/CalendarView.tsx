@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, addDays } from "date-fns";
+import { format, parse, startOfWeek, getDay, addDays, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -26,16 +26,30 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: CalendarViewProps) {
-  const rbcEvents = useMemo(
-    () =>
-      events.map((e) => ({
-        ...e,
-        start: new Date(e.start),
-        end: new Date(e.end),
-        title: `${e.deskName} · ${e.room}`
-      })),
-    [events]
-  );
+  const rbcEvents = useMemo(() => {
+    const weekStart = startOfWeek(defaultDate, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(defaultDate, { weekStartsOn: 1 });
+    const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
+
+    return days.map((day, idx) => {
+      const dayEvents = events.filter((e) => isSameDay(new Date(e.start), day));
+      const uniqueDeskNames = Array.from(new Set(dayEvents.map((e) => e.deskName)));
+      const title = uniqueDeskNames.length > 0 ? uniqueDeskNames.join(", ") : "NOT BOOKED YET";
+
+      const start = new Date(day);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(day);
+      end.setHours(23, 59, 59, 999);
+
+      return {
+        id: `day-${format(day, "yyyy-MM-dd")}-${idx}`,
+        start,
+        end,
+        title,
+        allDay: true
+      };
+    });
+  }, [events, defaultDate]);
 
   return (
     <div className="calendar-theme h-full w-full overflow-hidden rounded-2xl bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-subtle backdrop-blur-sm border border-white/[0.06] flex flex-col">

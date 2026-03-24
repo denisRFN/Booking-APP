@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { addDays, startOfWeek, endOfWeek, format } from "date-fns";
+import { addDays, startOfWeek, endOfWeek, format, isSameDay } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { MainLayout } from "../layouts/MainLayout";
@@ -184,7 +184,13 @@ export default function DashboardPage() {
       room: r.room
     })) ?? [];
 
-  const freeDesks = availabilityQuery.data?.filter((d) => d.status === "available") ?? [];
+  const myBookingsForSelectedDay = useMemo(() => {
+    return (
+      reservationsQuery.data?.filter((r) =>
+        isSameDay(new Date(r.start_time), selectedDate)
+      ) ?? []
+    );
+  }, [reservationsQuery.data, selectedDate]);
 
   const currentDesksForEditor = draftDesks ?? desksQuery.data ?? [];
 
@@ -414,40 +420,38 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Find free desk */}
+            {/* My booking for selected day */}
             <Card className="opacity-0 animate-stagger-2 rounded-2xl border border-white/[0.06] bg-card/80 backdrop-blur-md shadow-glass">
               <CardHeader>
-                <CardTitle className="font-display font-bold text-sm">Find free desk</CardTitle>
+                <CardTitle className="font-display font-bold text-sm">My booking (selected day)</CardTitle>
                 <CardDescription>
-                  Desks free on {selectedDate.toLocaleDateString()}. Click one on the map to reserve.
+                  {selectedDate.toLocaleDateString()} · Shows only your booked desk(s) for this day.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {availabilityQuery.isLoading && (
+                {reservationsQuery.isLoading && (
                   <div className="text-xs text-muted-foreground">Loading…</div>
                 )}
-                {!availabilityQuery.isLoading && freeDesks.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {freeDesks.map((d) => (
-                      <button
-                        key={d.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedDesk(d);
-                          setModalOpen(true);
-                        }}
-                        className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
+                {!reservationsQuery.isLoading && myBookingsForSelectedDay.length > 0 && (
+                  <div className="space-y-2">
+                    {myBookingsForSelectedDay.map((r) => (
+                      <div
+                        key={r.id}
+                        className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs"
                       >
-                        {d.name}
-                      </button>
+                        <div className="font-semibold text-primary">{r.desk_name}</div>
+                        <div className="text-muted-foreground">
+                          {new Date(r.start_time).toLocaleTimeString()} -{" "}
+                          {new Date(r.end_time).toLocaleTimeString()}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
-                {!availabilityQuery.isLoading && freeDesks.length === 0 && availabilityQuery.data?.length !== 0 && (
-                  <div className="text-xs text-muted-foreground">No free desks this day.</div>
-                )}
-                {!availabilityQuery.isLoading && availabilityQuery.data?.length === 0 && (
-                  <div className="text-xs text-muted-foreground">No desks configured.</div>
+                {!reservationsQuery.isLoading && myBookingsForSelectedDay.length === 0 && (
+                  <div className="rounded-lg border border-white/[0.08] bg-secondary/50 px-3 py-2 text-xs font-medium text-muted-foreground">
+                    NOT BOOKED YET
+                  </div>
                 )}
               </CardContent>
             </Card>

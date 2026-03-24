@@ -156,7 +156,11 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
       onOpenChange(false);
     } catch (err) {
       console.error(err);
-      setError("Could not create reservation(s). One or more selected days may already be booked.");
+      const apiError = err as { response?: { data?: { detail?: string } } };
+      setError(
+        apiError.response?.data?.detail ??
+          "Could not create reservation(s). One or more selected days may already be booked."
+      );
     } finally {
       setLoading(false);
     }
