@@ -25,8 +25,9 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
   const [weekDeskMap, setWeekDeskMap] = useState<Record<string, AvailabilityDesk | null>>({});
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [focusedDay, setFocusedDay] = useState<string>("");
-
-  if (!desk) return null;
+  const deskId = desk?.id ?? null;
+  const deskName = desk?.name ?? "";
+  const deskRoom = desk?.room ?? "";
 
   const weekDays = useMemo(() => {
     const start = startOfWeek(defaultDate, { weekStartsOn: 1 });
@@ -36,7 +37,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
   const dayKey = (d: Date) => format(d, "yyyy-MM-dd");
 
   useEffect(() => {
-    if (!open || !desk) return;
+    if (!open || !deskId) return;
 
     const loadWeekAvailability = async () => {
       setWeekLoading(true);
@@ -48,7 +49,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
             const { data } = await apiClient.get<AvailabilityDesk[]>("/availability", {
               params: { date: key }
             });
-            const deskForDay = data.find((item) => item.id === desk.id) ?? null;
+            const deskForDay = data.find((item) => item.id === deskId) ?? null;
             return [key, deskForDay] as const;
           })
         );
@@ -73,7 +74,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
     };
 
     loadWeekAvailability();
-  }, [open, desk, defaultDate, weekDays]);
+  }, [open, deskId, defaultDate, weekDays]);
 
   const focusedDeskStatus = focusedDay ? weekDeskMap[focusedDay] : null;
   const focusedBookedBy =
@@ -118,7 +119,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
           const { data } = await apiClient.get<AvailabilityDesk[]>("/availability", {
             params: { date: key }
           });
-          const freshDesk = data.find((item) => item.id === desk.id) ?? null;
+          const freshDesk = data.find((item) => item.id === deskId) ?? null;
           return { key, freshDesk };
         })
       );
@@ -145,7 +146,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
           end.setHours(eh, em, 0, 0);
 
           await apiClient.post("/reservations", {
-            desk_id: desk.id,
+            desk_id: deskId,
             start_time: start.toISOString(),
             end_time: end.toISOString()
           });
@@ -165,9 +166,9 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-display font-bold">Reserve {desk.name}</DialogTitle>
+          <DialogTitle className="font-display font-bold">Reserve {deskName}</DialogTitle>
           <DialogDescription>
-            Current week · Room {desk.room}
+            Current week · Room {deskRoom}
           </DialogDescription>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -249,7 +250,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || weekLoading || selectedDays.length === 0}>
+            <Button type="submit" disabled={loading || weekLoading || selectedDays.length === 0 || !deskId}>
               {loading ? "Booking..." : `Confirm reservation${selectedDays.length > 1 ? "s" : ""}`}
             </Button>
           </div>
