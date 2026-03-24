@@ -220,6 +220,23 @@ body {
   border-radius: 0.75rem 0.75rem 0 0;
 }
 
+/* Days-only calendar mode: hide hour grid and time gutter, keep only day headers + all-day row. */
+.calendar-theme.calendar-days-only .rbc-time-content,
+.calendar-theme.calendar-days-only .rbc-time-gutter,
+.calendar-theme.calendar-days-only .rbc-time-header-gutter,
+.calendar-theme.calendar-days-only .rbc-label {
+  display: none !important;
+}
+
+.calendar-theme.calendar-days-only .rbc-time-header-content {
+  margin-left: 0 !important;
+  border-left: 0 !important;
+}
+
+.calendar-theme.calendar-days-only .rbc-allday-cell {
+  min-height: 74px;
+}
+
 /* Shared desk tile visuals (image-based base + live badge). */
 .desk-tile {
   position: relative;

@@ -52,7 +52,7 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
   }, [events, defaultDate]);
 
   return (
-    <div className="calendar-theme h-full w-full overflow-hidden rounded-2xl bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-subtle backdrop-blur-sm border border-white/[0.06] flex flex-col">
+    <div className="calendar-theme calendar-days-only h-full w-full overflow-hidden rounded-2xl bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-subtle backdrop-blur-sm border border-white/[0.06] flex flex-col">
       {/* Custom toolbar: reduces confusion and guarantees day-by-day navigation */}
       <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-3 py-2">
         <div className="flex items-center gap-2">
@@ -78,9 +78,7 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
             Next
           </button>
         </div>
-        <div className="text-[11px] text-muted-foreground">
-          Week view
-        </div>
+        <div className="text-[11px] text-muted-foreground">Days only</div>
       </div>
 
       <div className="min-h-0 flex-1">
