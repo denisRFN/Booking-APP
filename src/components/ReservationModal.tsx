@@ -164,7 +164,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="top-[44%] -translate-y-1/2">
         <DialogHeader>
           <DialogTitle className="font-display font-bold">Reserve {deskName}</DialogTitle>
           <DialogDescription>
