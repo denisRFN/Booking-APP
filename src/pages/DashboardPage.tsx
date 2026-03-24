@@ -197,6 +197,19 @@ export default function DashboardPage() {
     );
     return sorted[0];
   }, [myBookingsForSelectedDay]);
+  const primaryBookedDeskIdForSelectedDay = primaryBookingForSelectedDay?.desk_id ?? null;
+
+  const availabilityForMap = useMemo(() => {
+    const rows = availabilityQuery.data ?? [];
+    // Guard against legacy/duplicated states: show "mine" only for the primary booked desk of selected day.
+    if (!primaryBookedDeskIdForSelectedDay) {
+      return rows.map((d) => (d.status === "mine" ? { ...d, status: "occupied" as const } : d));
+    }
+    return rows.map((d) => {
+      if (d.status !== "mine") return d;
+      return d.id === primaryBookedDeskIdForSelectedDay ? d : { ...d, status: "occupied" as const };
+    });
+  }, [availabilityQuery.data, primaryBookedDeskIdForSelectedDay]);
 
   const nextReservationsUniqueByDay = useMemo(() => {
     const rows = reservationsQuery.data ?? [];
@@ -230,11 +243,11 @@ export default function DashboardPage() {
 
   const rotationByIdAvailability = useMemo(() => {
     const m = new Map<number, number>();
-    (availabilityQuery.data ?? []).forEach((d) => {
+    availabilityForMap.forEach((d) => {
       if (typeof d.rotation_deg === "number") m.set(d.id, d.rotation_deg);
     });
     return m;
-  }, [availabilityQuery.data]);
+  }, [availabilityForMap]);
 
   const rotationByIdEditor = useMemo(() => {
     const m = new Map<number, number>();
@@ -409,9 +422,9 @@ export default function DashboardPage() {
                 ) : (
                   <>
                     {availabilityQuery.isLoading && <p className="text-sm text-muted-foreground p-4">Loading desks...</p>}
-                    {availabilityQuery.data && availabilityQuery.data.length > 0 && (
+                    {availabilityForMap.length > 0 && (
                       <DeskMap
-                        desks={availabilityQuery.data}
+                        desks={availabilityForMap}
                         onSelectDesk={handleDeskClick}
                         backgroundImageUrl={officeMapImageUrl}
                         getRotationDeg={getRotationDegAvailability}
