@@ -1,22 +1,8 @@
 import { useMemo } from "react";
-import { Calendar, dateFnsLocalizer, View } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, addDays, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
-import enUS from "date-fns/locale/en-US";
-import "react-big-calendar/lib/css/react-big-calendar.css";
+import { View } from "react-big-calendar";
+import { addDays, eachDayOfInterval, endOfWeek, format, isSameDay, startOfWeek } from "date-fns";
 
 import { ReservationEvent } from "../types/api";
-
-const locales = {
-  "en-US": enUS
-};
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
-  getDay,
-  locales
-});
 
 interface CalendarViewProps {
   events: ReservationEvent[];
@@ -26,34 +12,27 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: CalendarViewProps) {
-  const rbcEvents = useMemo(() => {
+  const weekDays = useMemo(() => {
     const weekStart = startOfWeek(defaultDate, { weekStartsOn: 1 });
     const weekEnd = endOfWeek(defaultDate, { weekStartsOn: 1 });
-    const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
+    return eachDayOfInterval({ start: weekStart, end: weekEnd });
+  }, [defaultDate]);
 
-    return days.map((day, idx) => {
-      const dayEvents = events.filter((e) => isSameDay(new Date(e.start), day));
-      const uniqueDeskNames = Array.from(new Set(dayEvents.map((e) => e.deskName)));
-      const title = uniqueDeskNames.length > 0 ? uniqueDeskNames.join(", ") : "NOT BOOKED YET";
-
-      const start = new Date(day);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(day);
-      end.setHours(23, 59, 59, 999);
-
-      return {
-        id: `day-${format(day, "yyyy-MM-dd")}-${idx}`,
-        start,
-        end,
-        title,
-        allDay: true
-      };
+  const eventsByDay = useMemo(() => {
+    const map = new Map<string, ReservationEvent[]>();
+    weekDays.forEach((d) => map.set(format(d, "yyyy-MM-dd"), []));
+    events.forEach((e) => {
+      const d = new Date(e.start);
+      const key = format(d, "yyyy-MM-dd");
+      if (map.has(key)) {
+        map.set(key, [...(map.get(key) ?? []), e]);
+      }
     });
-  }, [events, defaultDate]);
+    return map;
+  }, [events, weekDays]);
 
   return (
-    <div className="calendar-theme calendar-days-only h-full w-full overflow-hidden rounded-2xl bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-subtle backdrop-blur-sm border border-white/[0.06] flex flex-col">
-      {/* Custom toolbar: reduces confusion and guarantees day-by-day navigation */}
+    <div className="calendar-theme h-full w-full overflow-hidden rounded-2xl bg-gradient-to-br from-secondary/95 via-card/90 to-secondary/95 shadow-subtle backdrop-blur-sm border border-white/[0.06] flex flex-col">
       <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] px-3 py-2">
         <div className="flex items-center gap-2">
           <button
@@ -81,18 +60,49 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
         <div className="text-[11px] text-muted-foreground">Days only</div>
       </div>
 
-      <div className="min-h-0 flex-1">
-        <Calendar
-          localizer={localizer}
-          events={rbcEvents}
-          defaultView="week"
-          views={["week"]}
-          date={defaultDate}
-          onView={onViewChange}
-          style={{ height: "100%" }}
-          toolbar={false}
-          popup
-        />
+      <div className="grid min-h-0 flex-1 grid-cols-7 gap-2 p-2">
+        {weekDays.map((day) => {
+          const key = format(day, "yyyy-MM-dd");
+          const dayEvents = eventsByDay.get(key) ?? [];
+          const isSelected = isSameDay(day, defaultDate);
+          const primary = dayEvents[0];
+          const hasBooking = !!primary;
+
+          return (
+            <button
+              key={key}
+              type="button"
+              className={`rounded-xl border p-2 text-left transition-all ${
+                isSelected
+                  ? "border-primary/60 bg-primary/15 shadow-[0_0_0_1px_rgba(251,191,36,0.28)]"
+                  : "border-white/[0.08] bg-black/10 hover:border-white/[0.16] hover:bg-white/[0.02]"
+              }`}
+              onClick={() => onNavigate?.(day)}
+            >
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                {format(day, "EEE")}
+              </div>
+              <div className="text-[22px] font-semibold leading-tight text-foreground">{format(day, "d")}</div>
+
+              {!hasBooking && (
+                <div className="mt-2 inline-flex rounded-md border border-white/[0.08] bg-black/20 px-2 py-1 text-[10px] text-muted-foreground">
+                  No desk
+                </div>
+              )}
+
+              {hasBooking && (
+                <div className="mt-2 rounded-md border border-primary/35 bg-primary/15 px-2 py-1">
+                  <div className="truncate text-[11px] font-semibold text-primary-foreground">
+                    {primary.deskName}
+                  </div>
+                  <div className="text-[10px] text-foreground/75">
+                    {format(new Date(primary.start), "H:mm")} - {format(new Date(primary.end), "H:mm")}
+                  </div>
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
