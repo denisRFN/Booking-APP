@@ -60,14 +60,16 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
         <div className="text-[11px] text-muted-foreground">Days only</div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-7 gap-2 p-2">
-        {weekDays.map((day) => {
+      <div className="min-h-0 flex-1 overflow-x-auto">
+        <div className="grid min-h-0 grid-cols-7 gap-2 p-2 min-w-[560px]">
+          {weekDays.map((day) => {
           const key = format(day, "yyyy-MM-dd");
           const dayEvents = eventsByDay.get(key) ?? [];
           const isSelected = isSameDay(day, defaultDate);
           const primary = dayEvents[0];
           const hasBooking = !!primary;
 
+          return (
           return (
             <button
               key={key}
@@ -103,6 +105,7 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
             </button>
           );
         })}
+        </div>
       </div>
     </div>
   );

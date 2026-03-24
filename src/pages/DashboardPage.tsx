@@ -332,7 +332,7 @@ export default function DashboardPage() {
     <MainLayout>
       <div className="flex flex-col gap-6">
         {/* Office map + right column (calendar, lists) */}
-        <div className="grid gap-6 lg:grid-cols-[2.4fr_1.4fr] items-start">
+        <div className="grid gap-6 xl:grid-cols-[2.4fr_1.4fr] items-start">
           <div className="space-y-4 min-w-0">
             <Card className="opacity-0 animate-stagger-1">
             <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
