@@ -60,8 +60,8 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
         <div className="text-[11px] text-muted-foreground">Days only</div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-x-auto">
-        <div className="grid min-h-0 grid-cols-7 gap-2 p-2 min-w-[560px]">
+      <div className="min-h-0 flex-1">
+        <div className="grid min-h-0 grid-cols-7 gap-2 p-2">
           {weekDays.map((day) => {
           const key = format(day, "yyyy-MM-dd");
           const dayEvents = eventsByDay.get(key) ?? [];
