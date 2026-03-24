@@ -186,11 +186,17 @@ export default function DashboardPage() {
 
   const myBookingsForSelectedDay = useMemo(() => {
     return (
-      reservationsQuery.data?.filter((r) =>
-        isSameDay(new Date(r.start_time), selectedDate)
-      ) ?? []
+      reservationsQuery.data?.filter((r) => isSameDay(new Date(r.start_time), selectedDate)) ?? []
     );
   }, [reservationsQuery.data, selectedDate]);
+
+  const primaryBookingForSelectedDay = useMemo(() => {
+    if (myBookingsForSelectedDay.length === 0) return null;
+    const sorted = [...myBookingsForSelectedDay].sort(
+      (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+    );
+    return sorted[0];
+  }, [myBookingsForSelectedDay]);
 
   const currentDesksForEditor = draftDesks ?? desksQuery.data ?? [];
 
@@ -432,23 +438,23 @@ export default function DashboardPage() {
                 {reservationsQuery.isLoading && (
                   <div className="text-xs text-muted-foreground">Loading…</div>
                 )}
-                {!reservationsQuery.isLoading && myBookingsForSelectedDay.length > 0 && (
+                {!reservationsQuery.isLoading && primaryBookingForSelectedDay && (
                   <div className="space-y-2">
-                    {myBookingsForSelectedDay.map((r) => (
-                      <div
-                        key={r.id}
-                        className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs"
-                      >
-                        <div className="font-semibold text-primary">{r.desk_name}</div>
-                        <div className="text-muted-foreground">
-                          {new Date(r.start_time).toLocaleTimeString()} -{" "}
-                          {new Date(r.end_time).toLocaleTimeString()}
-                        </div>
+                    <div className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs">
+                      <div className="font-semibold text-primary">{primaryBookingForSelectedDay.desk_name}</div>
+                      <div className="text-muted-foreground">
+                        {new Date(primaryBookingForSelectedDay.start_time).toLocaleTimeString()} -{" "}
+                        {new Date(primaryBookingForSelectedDay.end_time).toLocaleTimeString()}
                       </div>
-                    ))}
+                    </div>
+                    {myBookingsForSelectedDay.length > 1 && (
+                      <div className="text-[11px] text-destructive/90">
+                        Multiple bookings found for this day (legacy data). Showing the first one.
+                      </div>
+                    )}
                   </div>
                 )}
-                {!reservationsQuery.isLoading && myBookingsForSelectedDay.length === 0 && (
+                {!reservationsQuery.isLoading && !primaryBookingForSelectedDay && (
                   <div className="rounded-lg border border-white/[0.08] bg-secondary/50 px-3 py-2 text-xs font-medium text-muted-foreground">
                     NOT BOOKED YET
                   </div>
