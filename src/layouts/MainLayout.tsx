@@ -20,6 +20,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     logout();
     setUser(null);
   };
+  const userInitials = getInitials(user?.name, user?.email);
 
   const NavLink = ({ to, label }: { to: string; label: string }) => {
     const active = location.pathname === to;
@@ -68,6 +69,9 @@ export function MainLayout({ children }: MainLayoutProps) {
             </Button>
             {user && (
               <>
+                <div className="hidden h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white shadow-md shadow-blue-900/25 sm:flex">
+                  {userInitials}
+                </div>
                 <div className="hidden text-right text-xs sm:block">
                   <div className="font-medium text-foreground">{user.name}</div>
                   <div className="truncate max-w-[160px] text-muted-foreground">{user.email}</div>
@@ -86,5 +90,16 @@ export function MainLayout({ children }: MainLayoutProps) {
       </div>
     </div>
   );
+}
+
+function getInitials(name?: string | null, email?: string | null): string {
+  const normalized = (name ?? "").trim();
+  if (normalized) {
+    const parts = normalized.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+  }
+  const localPart = (email ?? "").split("@")[0]?.replace(/[^a-zA-Z0-9]/g, "") ?? "";
+  return (localPart.slice(0, 2) || "U").toUpperCase();
 }
 
