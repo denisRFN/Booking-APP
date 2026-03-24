@@ -193,7 +193,10 @@ export default function DashboardPage() {
   const primaryBookingForSelectedDay = useMemo(() => {
     if (myBookingsForSelectedDay.length === 0) return null;
     const sorted = [...myBookingsForSelectedDay].sort(
-      (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+      (a, b) =>
+        new Date(a.start_time).getTime() - new Date(b.start_time).getTime() ||
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime() ||
+        a.id - b.id
     );
     return sorted[0];
   }, [myBookingsForSelectedDay]);
@@ -203,11 +206,27 @@ export default function DashboardPage() {
     const rows = availabilityQuery.data ?? [];
     // Guard against legacy/duplicated states: show "mine" only for the primary booked desk of selected day.
     if (!primaryBookedDeskIdForSelectedDay) {
-      return rows.map((d) => (d.status === "mine" ? { ...d, status: "occupied" as const } : d));
+      return rows.map((d) =>
+        d.status === "mine"
+          ? {
+              ...d,
+              status: "occupied" as const,
+              booked_by_name: null,
+              booked_by_email: null
+            }
+          : d
+      );
     }
     return rows.map((d) => {
       if (d.status !== "mine") return d;
-      return d.id === primaryBookedDeskIdForSelectedDay ? d : { ...d, status: "occupied" as const };
+      return d.id === primaryBookedDeskIdForSelectedDay
+        ? d
+        : {
+            ...d,
+            status: "occupied" as const,
+            booked_by_name: null,
+            booked_by_email: null
+          };
     });
   }, [availabilityQuery.data, primaryBookedDeskIdForSelectedDay]);
 

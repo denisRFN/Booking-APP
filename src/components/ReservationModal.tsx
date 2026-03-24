@@ -16,6 +16,12 @@ interface ReservationModalProps {
   onCreated: () => void;
 }
 
+interface MyReservationRow {
+  id: number;
+  desk_name: string;
+  start_time: string;
+}
+
 export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCreated }: ReservationModalProps) {
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("18:00");
@@ -23,6 +29,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
   const [weekLoading, setWeekLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [weekDeskMap, setWeekDeskMap] = useState<Record<string, AvailabilityDesk | null>>({});
+  const [myBookedDaysMap, setMyBookedDaysMap] = useState<Record<string, { deskName: string }>>({});
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [focusedDay, setFocusedDay] = useState<string>("");
   const deskId = desk?.id ?? null;
@@ -43,6 +50,16 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
       setWeekLoading(true);
       setError(null);
       try {
+        const { data: myReservations } = await apiClient.get<MyReservationRow[]>("/reservations", {
+          params: { mine: true }
+        });
+        const myDayMap: Record<string, { deskName: string }> = {};
+        myReservations.forEach((r) => {
+          const key = dayKey(new Date(r.start_time));
+          if (!myDayMap[key]) myDayMap[key] = { deskName: r.desk_name };
+        });
+        setMyBookedDaysMap(myDayMap);
+
         const results = await Promise.all(
           weekDays.map(async (d) => {
             const key = dayKey(d);
@@ -58,10 +75,10 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
         const defaultKey = dayKey(defaultDate);
         const defaultDesk = map[defaultKey];
         const initialSelectable =
-          defaultDesk && defaultDesk.status === "available"
+          defaultDesk && defaultDesk.status === "available" && !myDayMap[defaultKey]
             ? [defaultKey]
             : Object.entries(map)
-                .filter(([, value]) => value?.status === "available")
+                .filter(([key, value]) => value?.status === "available" && !myDayMap[key])
                 .map(([key]) => key)
                 .slice(0, 1);
         setSelectedDays(initialSelectable);
@@ -84,7 +101,7 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
 
   const toggleDay = (key: string) => {
     const status = weekDeskMap[key]?.status;
-    if (status !== "available") return;
+    if (status !== "available" || !!myBookedDaysMap[key]) return;
     setSelectedDays((prev) => (prev.includes(key) ? prev.filter((d) => d !== key) : [...prev, key]));
     setFocusedDay(key);
   };
@@ -109,6 +126,17 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
 
       if (eh < sh || (eh === sh && em <= sm)) {
         setError("End time must be after start time.");
+        setLoading(false);
+        return;
+      }
+
+      const { data: myReservationsNow } = await apiClient.get<MyReservationRow[]>("/reservations", {
+        params: { mine: true }
+      });
+      const alreadyBookedDays = new Set(myReservationsNow.map((r) => dayKey(new Date(r.start_time))));
+      const blockedDays = selectedDays.filter((key) => alreadyBookedDays.has(key));
+      if (blockedDays.length > 0) {
+        setError("You already have an active booking on this day. Only one desk per day is allowed.");
         setLoading(false);
         return;
       }
@@ -183,10 +211,17 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
                 const key = dayKey(d);
                 const dayDesk = weekDeskMap[key];
                 const status = dayDesk?.status ?? "occupied";
-                const isSelectable = status === "available";
+                const hasMyBooking = !!myBookedDaysMap[key];
+                const isSelectable = status === "available" && !hasMyBooking;
                 const isSelected = selectedDays.includes(key);
                 const statusLabel =
-                  status === "available" ? "Available" : status === "mine" ? "Booked by you" : "Unavailable";
+                  hasMyBooking
+                    ? "Already booked by you"
+                    : status === "available"
+                      ? "Available"
+                      : status === "mine"
+                        ? "Booked by you"
+                        : "Unavailable";
                 const occupiedBy =
                   status === "occupied"
                     ? dayDesk?.booked_by_name ?? dayDesk?.booked_by_email ?? "another user"
@@ -210,6 +245,11 @@ export function ReservationModal({ open, onOpenChange, desk, defaultDate, onCrea
                     <div className="text-xs font-semibold">{format(d, "EEE")}</div>
                     <div className="text-[11px] text-muted-foreground">{format(d, "dd MMM")}</div>
                     <div className="mt-1 text-[11px]">{statusLabel}</div>
+                    {hasMyBooking && (
+                      <div className="mt-0.5 truncate text-[10px] text-primary/90">
+                        Desk: {myBookedDaysMap[key]?.deskName}
+                      </div>
+                    )}
                     {occupiedBy && (
                       <div className="mt-0.5 truncate text-[10px] text-destructive/90">Occupied by: {occupiedBy}</div>
                     )}
