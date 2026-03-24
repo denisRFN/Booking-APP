@@ -40,8 +40,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/70 to-background">
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6">
+    <div className="min-h-screen min-h-dvh bg-gradient-to-br from-background via-secondary/70 to-background">
+      <div className="mx-auto flex min-h-screen min-h-dvh max-w-7xl flex-col px-4 py-6">
         <header className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-white/[0.06] bg-card/90 px-5 py-3.5 shadow-subtle backdrop-blur-xl">
           <div className="flex min-w-0 items-center gap-4">
             <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-primary to-amber-600 shadow-glow" />
@@ -83,7 +83,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             )}
           </div>
         </header>
-        <main className="flex-1 min-h-0 overflow-y-auto pb-4 max-h-[calc(100vh-10rem)]">{children}</main>
+        <main className="flex-1 min-h-0 overflow-y-auto pb-4 md:max-h-[calc(100dvh-10rem)]">{children}</main>
         <footer className="mt-4 text-center text-xs text-muted-foreground">
           DeskFlow · Modern desk booking for hybrid teams
         </footer>
