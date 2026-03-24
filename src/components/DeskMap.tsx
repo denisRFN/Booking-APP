@@ -1,4 +1,3 @@
-import { Button } from "./ui/button";
 import { cn } from "../lib/utils";
 import { AvailabilityDesk } from "../types/api";
 import { DeskTile } from "./DeskTile";
@@ -42,6 +41,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
             desk.booked_by_name && desk.booked_by_email
               ? `${desk.booked_by_name} (${desk.booked_by_email})`
               : desk.booked_by_name ?? desk.booked_by_email ?? null;
+          const bookedByInitials = getInitials(desk.booked_by_name, desk.booked_by_email);
 
           const tooltipTone =
             desk.status === "occupied"
@@ -85,7 +85,12 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                   />
                 {(desk.status !== "available") && (bookedBy || bookedRange) && (
                   <div className="pointer-events-none absolute left-1/2 top-[-10px] z-20 w-[260px] -translate-x-1/2 -translate-y-full opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                    <div className={`rounded-xl border ${tooltipTone} px-3 py-2 text-left text-[11px] text-muted-foreground shadow-glass backdrop-blur-xl`}>
+                    <div className={`relative rounded-xl border ${tooltipTone} px-3 py-2 text-left text-[11px] text-muted-foreground shadow-glass backdrop-blur-xl`}>
+                      {bookedByInitials && (
+                        <div className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow-md shadow-blue-900/30">
+                          {bookedByInitials}
+                        </div>
+                      )}
                       <div className="font-medium text-foreground">
                         {desk.status === "occupied" ? "Occupied" : desk.status === "mine" ? "My booking" : "Reserved"} · {desk.name} · {desk.room}
                       </div>
@@ -132,6 +137,17 @@ function LegendDot({ className, label }: { className: string; label: string }) {
       <span>{label}</span>
     </span>
   );
+}
+
+function getInitials(name?: string | null, email?: string | null): string {
+  const normalized = (name ?? "").trim();
+  if (normalized) {
+    const parts = normalized.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+  }
+  const localPart = (email ?? "").split("@")[0]?.replace(/[^a-zA-Z0-9]/g, "") ?? "";
+  return localPart.slice(0, 2).toUpperCase();
 }
 
 
