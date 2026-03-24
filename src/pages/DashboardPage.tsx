@@ -198,6 +198,25 @@ export default function DashboardPage() {
     return sorted[0];
   }, [myBookingsForSelectedDay]);
 
+  const nextReservationsUniqueByDay = useMemo(() => {
+    const rows = reservationsQuery.data ?? [];
+    const byDay = new Map<string, Reservation>();
+    rows.forEach((r) => {
+      const key = format(new Date(r.start_time), "yyyy-MM-dd");
+      const existing = byDay.get(key);
+      if (!existing) {
+        byDay.set(key, r);
+        return;
+      }
+      const currentTs = new Date(r.start_time).getTime();
+      const existingTs = new Date(existing.start_time).getTime();
+      if (currentTs < existingTs) byDay.set(key, r);
+    });
+    return Array.from(byDay.values()).sort(
+      (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+    );
+  }, [reservationsQuery.data]);
+
   const currentDesksForEditor = draftDesks ?? desksQuery.data ?? [];
 
   const weekRangeLabel = useMemo(() => {
@@ -447,11 +466,6 @@ export default function DashboardPage() {
                         {new Date(primaryBookingForSelectedDay.end_time).toLocaleTimeString()}
                       </div>
                     </div>
-                    {myBookingsForSelectedDay.length > 1 && (
-                      <div className="text-[11px] text-destructive/90">
-                        Multiple bookings found for this day (legacy data). Showing the first one.
-                      </div>
-                    )}
                   </div>
                 )}
                 {!reservationsQuery.isLoading && !primaryBookingForSelectedDay && (
@@ -471,7 +485,7 @@ export default function DashboardPage() {
                     <div className="text-xs text-muted-foreground">Loading…</div>
                   )}
                   {!reservationsQuery.isLoading &&
-                    (reservationsQuery.data?.slice(0, 5).map((r) => (
+                    (nextReservationsUniqueByDay.slice(0, 5).map((r) => (
                       <div key={r.id} className="flex items-start justify-between gap-3 rounded-lg border border-white/[0.04] bg-secondary/50 px-3 py-2">
                         <div className="min-w-0">
                           <div className="truncate font-medium">{r.desk_name} · {r.room}</div>
@@ -481,7 +495,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     )) ?? null)}
-                  {!reservationsQuery.isLoading && !reservationsQuery.data?.length && (
+                  {!reservationsQuery.isLoading && !nextReservationsUniqueByDay.length && (
                     <div className="text-xs text-muted-foreground">No reservations yet.</div>
                   )}
                 </div>
