@@ -70,7 +70,6 @@ export function CalendarView({ events, defaultDate, onNavigate, onViewChange }: 
           const hasBooking = !!primary;
 
           return (
-          return (
             <button
               key={key}
               type="button"
