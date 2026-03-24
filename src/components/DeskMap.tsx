@@ -45,7 +45,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
 
           const tooltipTone =
             desk.status === "occupied"
-              ? "border-destructive/25 bg-destructive/10"
+              ? "border-rose-300/45 bg-[linear-gradient(135deg,rgba(255,225,230,0.28),rgba(170,140,210,0.20))] dark:border-rose-300/35 dark:bg-[linear-gradient(135deg,rgba(90,20,35,0.45),rgba(60,35,90,0.35))]"
               : desk.status === "mine"
               ? "border-indigo-300/25 bg-indigo-500/10"
               : "border-white/[0.08] bg-card/95";
@@ -85,19 +85,19 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                   />
                 {(desk.status !== "available") && (bookedBy || bookedRange) && (
                   <div className="pointer-events-none absolute left-1/2 top-[-10px] z-20 w-[285px] -translate-x-1/2 -translate-y-full opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                    <div className={`relative rounded-xl border ${tooltipTone} px-3 py-2.5 text-left text-[12px] text-foreground/88 shadow-glass backdrop-blur-xl`}>
+                    <div className={`relative rounded-xl border ${tooltipTone} px-3 py-2.5 text-left text-[12px] text-foreground/90 shadow-[0_12px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl`}>
                       {bookedByInitials && (
-                        <div className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow-md shadow-blue-900/30 ring-1 ring-blue-300/35">
+                        <div className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white shadow-md shadow-blue-900/30 ring-2 ring-blue-300/45">
                           {bookedByInitials}
                         </div>
                       )}
-                      <div className="pr-9 font-semibold leading-snug text-foreground">
+                      <div className="pr-10 text-[13px] font-semibold leading-snug text-foreground">
                         {desk.status === "occupied" ? "Occupied" : desk.status === "mine" ? "My booking" : "Reserved"} · {desk.name} · {desk.room}
                       </div>
 
                       {desk.status === "occupied" && bookedBy && (
-                        <div className="mt-1 leading-snug text-rose-700 dark:text-rose-300">
-                          Occupied by: <span className="font-medium text-rose-800 dark:text-rose-200">{bookedBy}</span>
+                        <div className="mt-1 rounded-md border border-rose-300/45 bg-rose-200/35 px-2 py-1 leading-snug text-rose-800 dark:border-rose-300/30 dark:bg-rose-900/35 dark:text-rose-200">
+                          Occupied by: <span className="font-semibold">{bookedBy}</span>
                         </div>
                       )}
 
