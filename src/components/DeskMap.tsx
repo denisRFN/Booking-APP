@@ -65,7 +65,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
             >
               {/* Rotate wrapper (not the button) so Tailwind hover translate/scale still work on the desk chip */}
               <div
-                className="flex items-center justify-center"
+                className="relative z-10 flex items-center justify-center"
                 style={{ transform: deg ? `rotate(${deg}deg)` : undefined }}
               >
                 <button
@@ -84,7 +84,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                     }
                   />
                 {(desk.status !== "available") && (bookedBy || bookedRange) && (
-                  <div className="pointer-events-none absolute left-1/2 top-[-10px] z-50 w-[285px] -translate-x-1/2 -translate-y-full opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                  <div className="pointer-events-none absolute left-1/2 top-[-10px] z-[100] w-[285px] -translate-x-1/2 -translate-y-full opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                     <div className={`relative rounded-xl border ${tooltipTone} bg-card/90 px-3 py-2.5 text-left text-[12px] text-foreground/90 shadow-[0_12px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl`}>
                       {bookedByInitials && (
                         <div className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white shadow-md shadow-blue-900/30 ring-2 ring-blue-300/45">
