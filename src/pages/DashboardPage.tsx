@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { addDays, startOfWeek, endOfWeek, format, isSameDay } from "date-fns";
+import { addDays, startOfWeek, endOfWeek, format } from "date-fns";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { MainLayout } from "../layouts/MainLayout";
@@ -185,11 +185,13 @@ export default function DashboardPage() {
       room: r.room
     })) ?? [];
 
+  const selectedDayKey = format(selectedDate, "yyyy-MM-dd");
+
   const myBookingsForSelectedDay = useMemo(() => {
     return (
-      reservationsQuery.data?.filter((r) => isSameDay(new Date(r.start_time), selectedDate)) ?? []
+      reservationsQuery.data?.filter((r) => format(new Date(r.start_time), "yyyy-MM-dd") === selectedDayKey) ?? []
     );
-  }, [reservationsQuery.data, selectedDate]);
+  }, [reservationsQuery.data, selectedDayKey]);
 
   const primaryBookingForSelectedDay = useMemo(() => {
     if (myBookingsForSelectedDay.length === 0) return null;
