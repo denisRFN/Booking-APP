@@ -35,9 +35,10 @@ export default function DashboardPage() {
   const [draftDesks, setDraftDesks] = useState<Desk[] | null>(null);
 
   const availabilityQuery = useQuery({
-    queryKey: ["availability", selectedDate.toDateString()],
+    queryKey: ["availability", format(selectedDate, "yyyy-MM-dd")],
     queryFn: async () => {
-      const dateStr = selectedDate.toISOString().slice(0, 10);
+      // Local calendar date — never use toISOString().slice(0,10) here: UTC shifts the day in non-UTC zones.
+      const dateStr = format(selectedDate, "yyyy-MM-dd");
       const { data } = await apiClient.get<AvailabilityDesk[]>(`/availability`, {
         params: { date: dateStr }
       });
