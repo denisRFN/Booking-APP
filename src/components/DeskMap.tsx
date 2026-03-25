@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { cn } from "../lib/utils";
 import { AvailabilityDesk } from "../types/api";
 import { DeskTile } from "./DeskTile";
@@ -11,6 +13,7 @@ interface DeskMapProps {
 
 export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDeg }: DeskMapProps) {
   const clampPct = (v: number) => Math.max(3, Math.min(97, v));
+  const [hoveredDeskId, setHoveredDeskId] = useState<number | null>(null);
   const fmtRange = (from?: string | null, to?: string | null) => {
     if (!from || !to) return null;
     const a = new Date(from);
@@ -61,6 +64,7 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
             <div
               key={desk.id}
               className="absolute -translate-x-1/2 -translate-y-1/2"
+              style={{ zIndex: hoveredDeskId === desk.id ? 250 : undefined }}
               style={{ left: `${left}%`, top: `${top}%` }}
             >
               {/* Rotate wrapper (not the button) so Tailwind hover translate/scale still work on the desk chip */}
@@ -72,6 +76,8 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
                   type="button"
                   onClick={() => onSelectDesk(desk)}
                   className="group relative z-10 flex h-[56px] w-[120px] items-center justify-center transition-transform duration-200 hover:-translate-y-[6%] hover:scale-[1.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  onMouseEnter={() => setHoveredDeskId(desk.id)}
+                  onMouseLeave={() => setHoveredDeskId((prev) => (prev === desk.id ? null : prev))}
                 >
                   <DeskTile
                     label={desk.name}
