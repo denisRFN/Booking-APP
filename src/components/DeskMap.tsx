@@ -64,8 +64,11 @@ export function DeskMap({ desks, onSelectDesk, backgroundImageUrl, getRotationDe
             <div
               key={desk.id}
               className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ zIndex: hoveredDeskId === desk.id ? 250 : undefined }}
-              style={{ left: `${left}%`, top: `${top}%` }}
+              style={{
+                left: `${left}%`,
+                top: `${top}%`,
+                zIndex: hoveredDeskId === desk.id ? 250 : undefined
+              }}
             >
               {/* Rotate wrapper (not the button) so Tailwind hover translate/scale still work on the desk chip */}
               <div
